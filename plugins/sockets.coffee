@@ -12,55 +12,39 @@ exports.register = ( server, options, next ) ->
   io = require('socket.io')(server.listener)
 
   io.on 'connection', ( socket ) ->
-
-    # console.log server.cache
+    new_hand = new Hand()
 
     server.app.cache.set socket.id,
-      hand: new Hand()
+      hand: new_hand
     , null, ( err ) ->
       if err
         throw err
       return
 
-    # console.log socket
-    # console.log socket.id, socket.connected
-
     socket
-      .emit 'news', hello: 'world man'
-      .on 'client_event', ( data ) ->
-        console.log data, 'from', socket.id
-        return
+      .emit 'cards', new_hand.cards
       .on 'disconnect', ->
         console.log socket.id + ' disconnected'
         server.app.cache.drop socket.id, ( err ) ->
           if err
             throw err
         return
-      .on 'get_current_cards', ( data ) ->
-        console.log 'get_current_cards for ' + socket.id
-        server.app.cache.get socket.id, ( err, value ) ->
-          if err
-            throw err
-          socket.emit('cards', value.hand.cards );
-          return
-        return
       .on 'draw', ( data ) ->
         console.log 'draw for ' + socket.id
         server.app.cache.get socket.id, ( err, value ) ->
           if err
             throw err
-          hand = new Hand(
+          hand = new Hand
             deck: value.hand.deck.cards
             size: value.hand.size
-            cards: value.hand.cards
-          )
-          # console.log hand.cards
+            cards: value.hand.cards.map ( card ) ->
+              return card.opts
           data.forEach ( card, i ) ->
-            # console.log card.opts, card.held, i
             if !card.held
               hand.replace i
               console.log "Replaced " + i
             return
+          # console.log hand.cards
           socket.emit('cards', hand.cards );
           return
         return
