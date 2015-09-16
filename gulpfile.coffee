@@ -32,6 +32,13 @@ gulp.task 'sass', ->
 gulp.task 'copyjs', ->
   gulp.src './bower_components/jquery/dist/*'
     .pipe gulp.dest './static_generated/js'
+  gulp.src './modules/card.coffee'
+    .pipe sourcemaps.init()
+    .pipe coffee(
+      bare: true
+    ).on 'error', gutil.log
+    .pipe sourcemaps.write '../map'
+    .pipe gulp.dest './static_generated/js'
 
 gulp.task 'copystyle', ->
   gulp.src './bower_components/font-awesome/css/*'

@@ -1,8 +1,16 @@
 extends ./layouts/layout.jade
 
 block content
-  .container
-    .row
-      .col-sm-12
-        h2 Welcome
-        p This is going to be a game!
+  .row
+    .col-sm-12
+      h2 Let's play some Video Poker!
+      .hand
+        .card.card-1
+        .card.card-2
+        .card.card-3
+        .card.card-4
+        .card.card-5
+      a.btn.btn-primary.get_current_cards Get cards
+      a.btn.btn-primary.deal Get new hand
+      a.btn.btn-primary.draw Draw
+      a.btn.btn-primary.play Play
