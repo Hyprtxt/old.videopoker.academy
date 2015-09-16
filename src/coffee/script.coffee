@@ -37,7 +37,6 @@ socket
     return
   .on 'cards', ( data ) ->
     hand = data.map ( v ) ->
-      console.log v.opts.opts
       return new Card v.opts
     renderHand()
     return
