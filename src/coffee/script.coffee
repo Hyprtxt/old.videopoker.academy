@@ -5,6 +5,10 @@ $deal = $ '.deal'
 $draw = $ '.draw'
 $result = $ '.result'
 
+# Defined in simple.coffee
+# events = {}
+# $events = $ events
+
 hand = {}
 
 renderHand = ->
@@ -44,20 +48,29 @@ socket
     console.log data
     $result.text data.status + ' win:' + data.win
 
-
-addHoldEvents()
-
 $deal.on 'click', ->
   socket.emit 'deal'
-  $deal.attr 'hidden', true
-  $draw.removeAttr 'hidden'
-  addHoldEvents()
+  $events.trigger 'new_game'
   $result.text 'Do your best'
   return
 
 $draw.on 'click', ->
   socket.emit 'draw', hand
+  $events.trigger 'game_complete'
+  return
+
+$events.on 'game_complete', ->
+  console.log 'game_complete'
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
   return
+
+$events.on 'new_game', ->
+  console.log 'new_game'
+  $deal.attr 'hidden', true
+  $draw.removeAttr 'hidden'
+  addHoldEvents()
+  return
+
+$events.trigger 'new_game'

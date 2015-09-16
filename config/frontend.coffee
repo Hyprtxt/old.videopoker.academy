@@ -4,6 +4,7 @@ module.exports =
     '/socket.io/socket.io.js'
     '/js/jquery.min.js'
     '/js/card.js'
+    '/js/simple.js'
     '/js/script.js'
   ]
   stylesheets: [
