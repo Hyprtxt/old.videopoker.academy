@@ -1,4 +1,5 @@
 Hand = require '../modules/hand'
+Poker = require '../modules/poker'
 
 exports.register = ( server, options, next ) ->
   cache = server.cache
@@ -45,7 +46,11 @@ exports.register = ( server, options, next ) ->
               console.log "Replaced " + i
             return
           # console.log hand.cards
-          socket.emit('cards', hand.cards );
+          socket.emit 'cards', hand.cards
+
+          ## Scoring Here
+          socket.emit 'score', Poker hand.cards, 5
+
           return
         return
       .on 'deal', ( data ) ->
