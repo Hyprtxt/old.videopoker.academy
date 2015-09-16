@@ -1,8 +1,10 @@
 'use strict'
-
 # Jacks or Better scoring
 
-module.exports = ( cards, bet ) ->
+# !!! This is a shared module, used both server and client side
+# This module is just a function, different from the others
+
+Poker = ( cards, bet ) ->
   self = @
   bet = bet || 5
 
@@ -15,7 +17,7 @@ module.exports = ( cards, bet ) ->
   suits = cards.map ( card, i ) ->
     return card.suit
 
-  console.log suits, values
+  # console.log suits, values
   # , suits.sort( sortNumber )
 
   score =
@@ -128,3 +130,8 @@ module.exports = ( cards, bet ) ->
     score.win = 0
     return score
   return score
+
+if typeof window is 'undefined'
+  module.exports = Poker
+else
+  window.Poker = Poker

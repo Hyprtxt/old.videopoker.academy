@@ -5,6 +5,7 @@ module.exports =
     '/js/jquery.min.js'
     '/js/card.js'
     '/js/simple.js'
+    '/js/poker.js'
     '/js/script.js'
   ]
   stylesheets: [

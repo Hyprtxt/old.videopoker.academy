@@ -32,7 +32,7 @@ gulp.task 'sass', ->
 gulp.task 'copyjs', ->
   gulp.src './bower_components/jquery/dist/*'
     .pipe gulp.dest './static_generated/js'
-  gulp.src './modules/card.coffee'
+  gulp.src './modules/*.coffee'
     .pipe sourcemaps.init()
     .pipe coffee(
       bare: true

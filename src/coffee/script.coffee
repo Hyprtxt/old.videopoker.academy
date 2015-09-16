@@ -7,15 +7,16 @@ $result = $ '.result'
 
 # Defined in simple.coffee
 # events = {}
-# $events = $ events
+# _$events = $ events
 
-hand = {}
+# Defined here, used in simple.coffee
+_hand = {}
 
 renderHand = ->
-  hand.forEach ( card, i ) ->
+  _hand.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
     $card
-      .removeClass 'hold'
+      .removeClass 'hold red black'
       .text card.text()
       .addClass card.color()
     if card.held
@@ -25,7 +26,7 @@ renderHand = ->
 
 addHoldEvents = ->
   $hand.on 'click', '.card', ->
-    hand[$(this).index()].holdToggle()
+    _hand[$(this).index()].holdToggle()
     renderHand()
     return
 
@@ -40,7 +41,7 @@ socket
     console.log 'disconnected'
     return
   .on 'cards', ( data ) ->
-    hand = data.map ( v ) ->
+    _hand = data.map ( v ) ->
       return new Card v.opts
     renderHand()
     return
@@ -50,27 +51,27 @@ socket
 
 $deal.on 'click', ->
   socket.emit 'deal'
-  $events.trigger 'new_game'
+  _$events.trigger 'new_game'
   $result.text 'Do your best'
   return
 
 $draw.on 'click', ->
-  socket.emit 'draw', hand
-  $events.trigger 'game_complete'
+  socket.emit 'draw', _hand
+  _$events.trigger 'game_complete'
   return
 
-$events.on 'game_complete', ->
-  console.log 'game_complete'
+_$events.on 'game_complete', ->
+  # console.log 'game_complete'
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
   return
 
-$events.on 'new_game', ->
-  console.log 'new_game'
+_$events.on 'new_game', ->
+  # console.log 'new_game'
   $deal.attr 'hidden', true
   $draw.removeAttr 'hidden'
   addHoldEvents()
   return
 
-$events.trigger 'new_game'
+_$events.trigger 'new_game'
