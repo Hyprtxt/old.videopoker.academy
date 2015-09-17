@@ -19,6 +19,28 @@ _$events.on 'game_complete', ->
   $simple.attr 'hidden', true
   $simple.off 'click', simpleStrategy
 
+getRoyalFlushCards = ( high, flush ) ->
+  royalFlush =
+    cards: []
+    suit: flush.suit
+  high.cards.forEach ( cardindex ) ->
+    if flush.cards.indexOf( cardindex ) isnt -1
+      royalFlush.cards.push( cardindex )
+    return
+  return royalFlush
+
+getHighCards = ( hand ) ->
+  high =
+    cards: []
+  highCards = [0,9,10,11,12]
+  hand.forEach ( card, i ) ->
+    highCards.forEach ( val ) ->
+      if card.opts.value is val
+        high.cards.push( i )
+      return
+    return
+  return high
+
 getFlushCards = ( hand ) ->
   flush =
     cards: []
@@ -41,7 +63,10 @@ simpleStrategy = ->
   result = {}
   result.rule = 'Hold Nothing - default'
   score = Poker _hand
-  console.log _hand, 'simpleStrategy'
+  high = getHighCards _hand
+  flush = getFlushCards _hand
+  royal = getRoyalFlushCards high, flush
+  # console.log _hand, flush, high, royal, 'simpleStrategy'
 
   if score.status is 'royalflush'
     holdAll _hand
@@ -59,10 +84,11 @@ simpleStrategy = ->
     return result
 
   # Hold 4 to royal flush
-  # @todo
+  if royal.cards.length > 3
+    holdIndex _hand, royal.cards
+    result.rule = '4 to a royal flush'
+    return result
 
-  # Three of a kind, straight, flush, full house
-  # Hold 3 of a kind
   if score.status is '3kind'
     holdDupes _hand, 3
     result.rule = 'Hold - 3kind'
@@ -95,17 +121,13 @@ simpleStrategy = ->
     result.rule = 'Hold the jacksbetter pair'
     return result
 
-  # # 3 to a royal flush
-  # if royalFlush.cards.length > 2
-  #   hand.cards.map ( card, i ) ->
-  #     if royalFlush.cards.indexOf( card ) is -1
-  #       hand.replace( i )
-  #     return
-  #   result.rule = '3 to a royal flush'
-  #   return result
+  # 3 to a royal flush
+  if royal.cards.length > 2
+    holdIndex _hand, royal.cards
+    result.rule = '3 to a royal flush'
+    return result
 
   # 4 to a flush
-  flush = getFlushCards _hand
   if flush.cards.length > 3
     holdSuit _hand, flush.suit
     result.rule = '4 to a flush'

@@ -21,6 +21,15 @@ renderHand = ( hand ) ->
 
 # AUTO Strategy Functions
 
+holdIndex = ( hand, indexArrayToHold ) ->
+  hand.forEach ( card, idx ) ->
+    # console.log idx, indexArrayToHold, indexArrayToHold.indexOf idx
+    if indexArrayToHold.indexOf(idx) isnt -1
+      card.hold()
+    return
+  renderHand hand
+  return
+
 holdSuit = ( hand, suit ) ->
   hand.forEach ( card ) ->
     if card.suit is suit

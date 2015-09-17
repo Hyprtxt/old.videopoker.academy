@@ -89,7 +89,25 @@ exports.register = ( server, options, next ) ->
               suit: 0
               value: 3
             ]
-          socket.emit('cards', test.cards );
+        if data is '3toRoyalFlush'
+          test = new Hand
+            cards: [
+              suit: 0
+              value: 10
+            ,
+              suit: 0
+              value: 11
+            ,
+              suit: 0
+              value: 12
+            ,
+              suit: 1
+              value: 5
+            ,
+              suit: 1
+              value: 3
+            ]
+        socket.emit('cards', test.cards );
           # console.log test.cards
     return
 
