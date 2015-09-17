@@ -1,10 +1,10 @@
 # globals
-_hand = _hand
-_$events = _$events
+# _hand = _hand
+# _$events = _$events
+# $buttons = $ '.buttons'
 
 console.log 'simple strategy loaded'
 
-$buttons = $ '.buttons'
 $simpleBtn = $ '<a>'
   .addClass 'btn btn-primary simple'
   .text 'AUTO: Simple Strategy'
@@ -37,43 +37,11 @@ getFlushCards = ( hand ) ->
       return
   return flush
 
-holdSuit = ( hand, suit ) ->
-  hand.forEach ( card ) ->
-    if card.suit is suit
-      card.hold()
-    return
-  renderHand hand
-  return
-
-holdDupes = ( hand, length ) ->
-  [0..12].forEach ( v, i ) ->
-    holds = []
-    hand.forEach ( card, idx ) ->
-      if card.value == v
-        holds.push( idx )
-      return
-    if holds.length is length
-      hand.forEach ( card, index ) ->
-        if card.value is v
-          card.hold()
-      return
-  renderHand hand
-  return
-
-holdAll = ( hand ) ->
-  hand.forEach ( card ) ->
-    card.hold()
-    return
-  renderHand hand
-  return
-
 simpleStrategy = ->
-  console.log 'simple clicked', _hand
   result = {}
   result.rule = 'Hold Nothing - default'
   score = Poker _hand
-  console.log score
-  # console.log getFlushCards _hand
+  console.log _hand, 'simpleStrategy'
 
   if score.status is 'royalflush'
     holdAll _hand
@@ -149,5 +117,4 @@ simpleStrategy = ->
     result.rule = 'Hold the Low Pair'
     return result
 
-  console.log result
   return result

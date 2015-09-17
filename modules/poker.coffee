@@ -6,8 +6,6 @@
 
 Poker = ( cards, bet ) ->
 
-  console.log cards, bet, 'POKER'
-
   self = @
   bet = bet || 5
 
