@@ -69,6 +69,28 @@ exports.register = ( server, options, next ) ->
             return
           return
         return
+      .on 'test', ( data ) ->
+        console.log data, 'Test'
+        if data is '4toFlush'
+          test = new Hand
+            cards: [
+              suit: 0
+              value: 2
+            ,
+              suit: 1
+              value: 3
+            ,
+              suit: 0
+              value: 4
+            ,
+              suit: 0
+              value: 5
+            ,
+              suit: 0
+              value: 3
+            ]
+          socket.emit('cards', test.cards );
+          # console.log test.cards
     return
 
   next()

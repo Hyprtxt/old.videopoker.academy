@@ -1,19 +1,21 @@
+# globals
+_hand = _hand
+_$events = _$events
+
 socket = io '/'
 
 $hand = $ '.hand'
 $deal = $ '.deal'
 $draw = $ '.draw'
 $result = $ '.result'
+$test = $ '.test'
 
-# Defined in simple.coffee
-# events = {}
-# _$events = $ events
+console.log _hand, '_HAND'
 
 # Defined here, used in simple.coffee
-_hand = {}
 
-renderHand = ->
-  _hand.forEach ( card, i ) ->
+renderHand = ( hand ) ->
+  hand.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
     $card
       .removeClass 'hold red black'
@@ -24,10 +26,10 @@ renderHand = ->
     return
   return
 
-addHoldEvents = ->
+addHoldEvents = ( hand ) ->
   $hand.on 'click', '.card', ->
-    _hand[$(this).index()].holdToggle()
-    renderHand()
+    hand[$(this).index()].holdToggle()
+    renderHand hand
     return
 
 removeHoldEvents = ->
@@ -41,13 +43,18 @@ socket
     console.log 'disconnected'
     return
   .on 'cards', ( data ) ->
+    console.log _hand
     _hand = data.map ( v ) ->
       return new Card v.opts
-    renderHand()
+    renderHand _hand
     return
   .on 'score', ( data ) ->
     console.log data
     $result.text data.status + ' win:' + data.win
+
+$test.on 'click', ->
+  socket.emit 'test', '4toFlush'
+  return
 
 $deal.on 'click', ->
   socket.emit 'deal'

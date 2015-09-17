@@ -3,6 +3,7 @@ module.exports =
   javascripts: [
     '/socket.io/socket.io.js'
     '/js/jquery.min.js'
+    '/js/global.js'
     '/js/card.js'
     '/js/simple.js'
     '/js/poker.js'

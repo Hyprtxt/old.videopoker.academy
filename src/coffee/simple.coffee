@@ -1,7 +1,8 @@
-console.log 'simple strategy loaded'
+# globals
+_hand = _hand
+_$events = _$events
 
-events = {}
-_$events = $ events
+console.log 'simple strategy loaded'
 
 $buttons = $ '.buttons'
 $simpleBtn = $ '<a>'
@@ -18,6 +19,32 @@ _$events.on 'game_complete', ->
   $simple.attr 'hidden', true
   $simple.off 'click', simpleStrategy
 
+getFlushCards = ( hand ) ->
+  flush =
+    cards: []
+    suit: ''
+  [0..3].forEach ( v ) ->
+    count = 0
+    cards = []
+    hand.forEach ( card, idx ) ->
+      if card.opts.suit == v
+        count++
+        cards.push( idx )
+      return
+    if cards.length > 2
+      flush.cards = cards
+      flush.suit = v
+      return
+  return flush
+
+holdSuit = ( hand, suit ) ->
+  hand.forEach ( card ) ->
+    if card.suit is suit
+      card.hold()
+    return
+  renderHand hand
+  return
+
 holdDupes = ( hand, length ) ->
   [0..12].forEach ( v, i ) ->
     holds = []
@@ -30,30 +57,31 @@ holdDupes = ( hand, length ) ->
         if card.value is v
           card.hold()
       return
-  renderHand()
+  renderHand hand
   return
 
 holdAll = ( hand ) ->
   hand.forEach ( card ) ->
     card.hold()
     return
-  renderHand()
+  renderHand hand
   return
 
 simpleStrategy = ->
-  # console.log 'simple clicked', _hand
+  console.log 'simple clicked', _hand
   result = {}
   result.rule = 'Hold Nothing - default'
   score = Poker _hand
   console.log score
+  # console.log getFlushCards _hand
 
   if score.status is 'royalflush'
-    holdAll()
+    holdAll _hand
     result.rule = 'Hold - royalflush'
     return result
 
   if score.status is 'straightflush'
-    holdAll()
+    holdAll _hand
     result.rule = 'Hold - straightflush'
     return result
 
@@ -68,34 +96,34 @@ simpleStrategy = ->
   # Three of a kind, straight, flush, full house
   # Hold 3 of a kind
   if score.status is '3kind'
-    result.hand = holdDupes( _hand, 3 )
+    holdDupes _hand, 3
     result.rule = 'Hold - 3kind'
     return result
 
   if score.status is 'straight'
-    holdAll()
+    holdAll _hand
     result.rule = 'Hold - straight'
     return result
 
   if score.status is 'flush'
-    holdAll()
+    holdAll _hand
     result.rule = 'Hold - flush'
     return result
 
   if score.status is 'fullhouse'
-    holdAll()
+    holdAll _hand
     result.rule = 'Hold - fullhouse'
     return result
 
   # Two pair
   if score.status is '2pair'
-    result.hand = holdDupes( _hand, 2 )
+    holdDupes _hand, 2
     result.rule = 'Hold 2 Pair'
     return result
 
   # High pair
   if score.status is 'jacksbetter'
-    result.hand = holdDupes( _hand, 2 )
+    holdDupes _hand, 2
     result.rule = 'Hold the jacksbetter pair'
     return result
 
@@ -108,18 +136,16 @@ simpleStrategy = ->
   #   result.rule = '3 to a royal flush'
   #   return result
 
-  # # 4 to a flush
-  # if flush.cards.length > 3
-  #   hand.cards.map ( card, i ) ->
-  #     if flush.cards.indexOf( i ) is -1
-  #       hand.replace( i )
-  #     return
-  #   result.rule = '4 to a flush'
-  #   return result
+  # 4 to a flush
+  flush = getFlushCards _hand
+  if flush.cards.length > 3
+    holdSuit _hand, flush.suit
+    result.rule = '4 to a flush'
+    return result
 
   # Low pair
   if score.status is 'lowpair'
-    result.hand = holdDupes( _hand, 2 )
+    holdDupes _hand, 2
     result.rule = 'Hold the Low Pair'
     return result
 

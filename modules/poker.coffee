@@ -5,6 +5,9 @@
 # This module is just a function, different from the others
 
 Poker = ( cards, bet ) ->
+
+  console.log cards, bet, 'POKER'
+
   self = @
   bet = bet || 5
 
