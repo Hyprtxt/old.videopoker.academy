@@ -107,6 +107,42 @@ exports.register = ( server, options, next ) ->
               suit: 1
               value: 3
             ]
+        if data is '4toOusideStraight'
+          test = new Hand
+            cards: [
+              suit: 0
+              value: 4
+            ,
+              suit: 1
+              value: 6
+            ,
+              suit: 0
+              value: 12
+            ,
+              suit: 3
+              value: 5
+            ,
+              suit: 1
+              value: 7
+            ]
+          if data is '2highCards'
+            test = new Hand
+              cards: [
+                suit: 3
+                value: 0
+              ,
+                suit: 2
+                value: 1
+              ,
+                suit: 1
+                value: 12
+              ,
+                suit: 1
+                value: 11
+              ,
+                suit: 0
+                value: 9
+              ]
         socket.emit('cards', test.cards );
           # console.log test.cards
     return

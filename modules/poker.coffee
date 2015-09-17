@@ -66,7 +66,7 @@ Poker = ( cards, bet ) ->
         count++
       return
     if count is 2
-      if v >= 9 or v is 0
+      if v >= 10 or v is 0
         jacksorbetter = true
       if pair1 is true
         pair2 = true

@@ -15,7 +15,7 @@ addHoldEvents = ->
   $hand.on 'click', '.card', holdEvent
 
 removeHoldEvents = ->
-  $hand.off 'click', '.card', holdEvent
+  $hand.off 'click', '.card'
 
 $deal.on 'click', ->
   socket.emit 'deal'

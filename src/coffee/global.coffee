@@ -30,6 +30,16 @@ holdIndex = ( hand, indexArrayToHold ) ->
   renderHand hand
   return
 
+holdAllExcept = ( hand, index ) ->
+  console.log hand, index
+  hand.forEach ( card, i ) ->
+    if i isnt index
+      card.hold()
+    console.log card, i, index
+    return
+  renderHand hand
+  return
+
 holdSuit = ( hand, suit ) ->
   hand.forEach ( card ) ->
     if card.suit is suit
