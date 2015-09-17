@@ -68,16 +68,19 @@ simpleStrategy = ->
   royal = getRoyalFlushCards high, flush
   # console.log _hand, flush, high, royal, 'simpleStrategy'
 
+  # Royal Flush
   if score.status is 'royalflush'
     holdAll _hand
     result.rule = 'Hold - royalflush'
     return result
 
+  # Straight Flush
   if score.status is 'straightflush'
     holdAll _hand
     result.rule = 'Hold - straightflush'
     return result
 
+  # 4 of a Kind
   if score.status is '4kind'
     holdDupes hand, 4
     result.rule = 'Hold - 4kind'
@@ -89,21 +92,25 @@ simpleStrategy = ->
     result.rule = '4 to a royal flush'
     return result
 
+  # 3 of a Kind
   if score.status is '3kind'
     holdDupes _hand, 3
     result.rule = 'Hold - 3kind'
     return result
 
+  # Straight
   if score.status is 'straight'
     holdAll _hand
     result.rule = 'Hold - straight'
     return result
 
+  # Flush
   if score.status is 'flush'
     holdAll _hand
     result.rule = 'Hold - flush'
     return result
 
+  # Full House
   if score.status is 'fullhouse'
     holdAll _hand
     result.rule = 'Hold - fullhouse'
