@@ -36,19 +36,18 @@ outsideStraights = [
 	[8,9,10,11]
 ]
 
-allStraights = [
-	[0,9,10,11,12]
-	[1..5]
-	[2..6]
-	[3..7]
-	[4..8]
-	[5..9]
-	[6..10]
-	[7..11]
-	[8..12]
-]
-
-fourOfStraights = ( allStraights ) ->
+fourOfStraights = ->
+  allStraights = [
+  	[0,9,10,11,12]
+  	[1..5]
+  	[2..6]
+  	[3..7]
+  	[4..8]
+  	[5..9]
+  	[6..10]
+  	[7..11]
+  	[8..12]
+  ]
   result = []
   allStraights.forEach ( arr ) ->
     copy = arr.slice 0
@@ -77,7 +76,7 @@ fourOfStraights = ( allStraights ) ->
     return copy
   return result
 
-# console.log fourOfStraights( allStraights ), 'fourOfStraights'
+# console.log fourOfStraights(), 'fourOfStraights'
 
 copyAndRemoveSingleCard = ( array, index ) ->
   # console.log array, index
@@ -155,33 +154,48 @@ getFlushCards = ( hand ) ->
       return
   return flush
 
-isOutsideStraight = ( hand ) ->
+getStraightOutlier = ( hand, type = 'all' ) ->
   result = {}
-  result.haveOutsideStraight = false
-  result.outlierIndex = -1
-  outsideStraights.forEach ( arr, i ) ->
-    straightString = JSON.stringify arr
-    handsWithFourCards( hand ).forEach ( hand, idx ) ->
-      handString = JSON.stringify getCardValuesOrdered( hand )
-      # idx is the card not part of the straight
-      if handString is straightString
-        result.haveOutsideStraight = true
+  result.haveStraight = false
+  result.outlierIndex = false
+  result.type = type
+  fourCardHands = handsWithFourCards( hand )
+  # console.log fourCardHands
+  straights = []
+  if type is 'all'
+    # inside straights
+    straights = fourOfStraights()
+  else
+    # outside straights
+    straights = outsideStraights
+  straights.forEach ( partialStraight, index ) ->
+    partialStraightString = JSON.stringify partialStraight
+    fourCardHands.forEach ( partialHand, idx ) ->
+      partialHandString = JSON.stringify getCardValuesOrdered( partialHand )
+      if partialHandString is partialStraightString
+        result.haveStraight = true
         result.outlierIndex = idx
+      # console.log partialHandString is partialStraightString, partialHandString, partialStraightString, idx
       return
     return
   return result
+
+getFlushOutlier = ( hand ) ->
+  flush = getFlushCards hand
+  outlierIndex = -1
+  if flush.cards.length isnt 4
+    return false
+  else
+    hand.forEach ( card, idx ) ->
+      if card.suit isnt flush.suit
+        outlierIndex = idx
+      return
+  return outlierIndex
 
 simpleStrategy = ->
   result = {}
   result.rule = 'Error! No rules applied'
   score = Poker _hand
-  high = getHighCards _hand
-  flush = getFlushCards _hand
-  royal = getRoyalCards _hand
-  royalFlush = getRoyalFlushCards royal, flush
-  values = getCardValuesOrdered _hand
-  # console.log _hand, flush, high, royalFlush, 'simpleStrategy'
-  # console.log _hand, values, 'simpleStrategy'
 
   # 1. Royal Flush
   if score.status is 'royalflush'
@@ -202,6 +216,9 @@ simpleStrategy = ->
     return result
 
   # 2. Hold 4 to royal flush
+  flush = getFlushCards _hand
+  royal = getRoyalCards _hand
+  royalFlush = getRoyalFlushCards royal, flush
   if royalFlush.cards.length > 3
     holdIndex _hand, royal.cards
     result.rule = '2. 4 to a royal flush'
@@ -232,8 +249,16 @@ simpleStrategy = ->
     return result
 
   # 4. 4 to straight flush
-  # console.log _hand
-  # console.log handsWithFourCards _hand
+  flushOutlier = getFlushOutlier _hand
+  straightOutlier = getStraightOutlier _hand
+  # console.log flushOutlier, 'getFlushOutlier'
+  # console.log straightOutlier, 'getStraightOutlier'
+  if flushOutlier
+    if straightOutlier.haveStraight
+      if flushOutlier is straightOutlier.outlierIndex
+        holdSuit _hand, flush.suit
+        result.rule = '4. 4 to straight flush'
+        return result
 
   # 5. Two pair
   if score.status is '2pair'
@@ -242,14 +267,13 @@ simpleStrategy = ->
     return result
 
   # 6. High pair
-  # !!! Check jacksbetter for 10's
   if score.status is 'jacksbetter'
     holdDupes _hand, 2
     result.rule = '6. high pair'
     return result
 
   # 7. 3 to a royal flush
-  # holds too many cards
+  # !!! holds too many cards when high non flush cards present
   if royalFlush.cards.length > 2
     # need to cross check royal.cards and flush.cards
     # only save the dupes
@@ -270,14 +294,14 @@ simpleStrategy = ->
     return result
 
   # 10. 4 to an outside straight
-  rule10 = isOutsideStraight _hand
-  if rule10.haveOutsideStraight
+  rule10 = getStraightOutlier _hand, 'outside'
+  if rule10.haveStraight
     holdAllExcept _hand, rule10.outlierIndex
     result.rule = '10. 4 to an outside straight'
     return result
 
-
   # 11. 2 suited high cards
+  high = getHighCards _hand
   # if high.cards.length > 1
   #   # THINK: 3 high, 2 suited
   #   result.rule = '11. 2 suited high cards'
@@ -287,8 +311,11 @@ simpleStrategy = ->
   #   return result
 
   # 12. 3 to a straight flush
+  # @todo
+
 
   # 13. 2 unsuited high cards (if more than 2 then pick the lowest 2)
+  # !!! INCOMPLETE
   if high.cards.length is 2
     result.rule = '13. 2 unsuited high cards (if more than 2 then pick the lowest 2)'
     holdIndex _hand, high.cards
@@ -301,6 +328,7 @@ simpleStrategy = ->
 
 
   # 14. Suited 10/J, 10/Q, or 10/K
+  # @todo
 
   # 15. One high card
   if high.cards.length is 1
