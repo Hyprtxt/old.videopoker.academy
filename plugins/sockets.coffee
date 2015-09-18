@@ -197,6 +197,24 @@ exports.register = ( server, options, next ) ->
               suit: 0
               value: 8
             ]
+        if data is 'suited10Q'
+          test = new Hand
+            cards: [
+              suit: 0
+              value: 5
+            ,
+              suit: 0
+              value: 7
+            ,
+              suit: 1
+              value: 9
+            ,
+              suit: 1
+              value: 11
+            ,
+              suit: 0
+              value: 8
+            ]
         socket.emit( 'cards', test.cards )
         return
     return

@@ -201,6 +201,13 @@ getSuitCards = ( hand, suit ) ->
     return false
   return cards
 
+handHasValue = ( hand, value ) ->
+  values = getCardValuesOrdered hand
+  result = false
+  if values.indexOf value
+    result = true
+  return result
+
 getStraightOutlier = ( hand, type = 'all' ) ->
   result = {}
   result.haveStraight = false
@@ -482,8 +489,16 @@ simpleStrategy = ->
     return result
 
   # 14. Suited 10/J, 10/Q, or 10/K
-  # !!! INCOMPLETE
-  # @todo
+  # Never 2 suited highs becuase rule 11
+  # Only ever one 10, because pair would be held
+  if high.cards.length > 0
+    if handHasValue _hand, 9 # has a 10?
+      _hand.forEach ( card ) ->
+        if card.value is 9
+          card.hold()
+      holdCards high
+      result.rule = '14. Suited 10/J, 10/Q, or 10/K'
+      return result
 
   # 15. One high card
   # only one high card available because rule 13
@@ -494,5 +509,5 @@ simpleStrategy = ->
     return result
 
   # 16. Discard everything
-  result.rule = '16. Hold Nothing - default'
+  result.rule = '16. Hold Nothing'
   return result
