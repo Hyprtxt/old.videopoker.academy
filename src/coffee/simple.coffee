@@ -476,21 +476,41 @@ simpleStrategy = ->
     return result
 
   # 13. 2 unsuited high cards (if more than 2 then pick the lowest 2)
-  # !!! INCOMPLETE
   high = getHighCards _hand
   if high.cards.length is 2
     holdCards high
     result.rule = '13.1 2 unsuited high cards'
     return result
+  # remove Aces if 2 cards hold else remove kings if 2 cards hold
   if high.cards.length > 2
-    console.log high, 'Rule13.2  Pick lowest 2 High Cards'
+    # remove aces
+    filteredHigh = {}
+    doubleFilteredHigh = {}
+    filteredHigh.cards = high.cards.filter ( card ) ->
+      if card.value isnt 0
+        return true
+      else
+        return false
+    if filteredHigh.cards.length is 2
+      # console.log 'keep these', filteredHigh
+      holdCards filteredHigh
+    # remove kings
+    doubleFilteredHigh.cards = filteredHigh.cards.filter ( card ) ->
+      console.log card.value
+      if card.value isnt 12
+        return true
+      else
+        return false
+    if doubleFilteredHigh.cards.length is 2
+      # console.log 'keep these', doubleFilteredHigh
+      holdCards doubleFilteredHigh
     result.rule = '13.2 2 unsuited high cards (if more than 2 then pick the lowest 2)'
-    # hold the lowest 2 high cards
     return result
 
   # 14. Suited 10/J, 10/Q, or 10/K
   # Never 2 suited highs becuase rule 11
   # Only ever one 10, because pair would be held
+  high = getHighCards _hand
   if high.cards.length > 0
     if handHasValue _hand, 9 # has a 10?
       _hand.forEach ( card ) ->

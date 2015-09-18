@@ -215,6 +215,24 @@ exports.register = ( server, options, next ) ->
               suit: 0
               value: 8
             ]
+        if data is 'lowUnsuited'
+          test = new Hand
+            cards: [
+              suit: 3
+              value: 12
+            ,
+              suit: 3
+              value: 5
+            ,
+              suit: 2
+              value: 11
+            ,
+              suit: 1
+              value: 7
+            ,
+              suit: 0
+              value: 10
+            ]
         socket.emit( 'cards', test.cards )
         return
     return
