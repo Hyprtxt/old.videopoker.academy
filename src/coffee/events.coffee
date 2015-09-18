@@ -29,14 +29,14 @@ $draw.on 'click', ->
   return
 
 _$events.on 'game_complete', ->
-  console.log _hand, 'game_complete'
+  # console.log _hand, 'game_complete'
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
   return
 
 _$events.on 'new_game', ->
-  console.log _hand, 'new_game'
+  # console.log _hand, 'new_game'
   $deal.attr 'hidden', true
   $draw.removeAttr 'hidden'
   addHoldEvents()

@@ -26,28 +26,38 @@ _$events.on 'game_complete', ->
   $simple.off 'click'
 
 outsideStraights = [
-	[1,2,3,4]
-	[2,3,4,5]
-	[3,4,5,6]
-	[4,5,6,7]
-	[5,6,7,8]
-	[6,7,8,9]
-	[7,8,9,10]
-	[8,9,10,11]
+  [1,2,3,4]
+  [2,3,4,5]
+  [3,4,5,6]
+  [4,5,6,7]
+  [5,6,7,8]
+  [6,7,8,9]
+  [7,8,9,10]
+  [8,9,10,11]
 ]
 
+allStraights = [
+  [0,9,10,11,12] # aces high
+  [0..4] # aces low
+  [1..5]
+  [2..6]
+  [3..7]
+  [4..8]
+  [5..9]
+  [6..10]
+  [7..11]
+  [8..12]
+]
+
+unique = ( a, b ) ->
+  if a.indexOf( b ) < 0
+    a.push b
+  return a
+
+parse = ( string ) ->
+  return JSON.parse string
+
 fourOfStraights = ->
-  allStraights = [
-  	[0,9,10,11,12]
-  	[1..5]
-  	[2..6]
-  	[3..7]
-  	[4..8]
-  	[5..9]
-  	[6..10]
-  	[7..11]
-  	[8..12]
-  ]
   result = []
   allStraights.forEach ( arr ) ->
     copy = arr.slice 0
@@ -151,7 +161,7 @@ getFlushCards = ( hand ) ->
     if cards.length > 2
       flush.cards = cards
       flush.suit = v
-      return
+    return
   return flush
 
 getStraightOutlier = ( hand, type = 'all' ) ->
@@ -191,6 +201,97 @@ getFlushOutlier = ( hand ) ->
         outlierIndex = idx
       return
   return outlierIndex
+
+getTriplets = ( things = [] ) ->
+  triplets = []
+  # All Hold 3 Patterns? *=hold x=discard
+  # 0. xx***
+  # 1. x*x**
+  # 2. x**x*
+  # 3. x***x
+  # 4. *x**x
+  # 5. **x*x
+  # 6. ***xx
+  # 7. *x*x*
+  # 8. *xx**
+  # 9. **xx*
+  if things.length isnt 5
+    return false
+  else
+    [0..9].forEach ( index ) ->
+      clone = things.slice 0
+      if index is 0
+        # 0. xx***
+        clone.splice 0, 2
+      if index is 1
+        # 1. x*x**
+        clone.splice 2, 1
+        clone.splice 0, 1
+      if index is 2
+        # 2. x**x*
+        clone.splice 3, 1
+        clone.splice 0, 1
+      if index is 3
+        # 3. x***x
+        clone.splice 4, 1
+        clone.splice 0, 1
+      if index is 4
+        # 4. *x**x
+        clone.splice 4, 1
+        clone.splice 1, 1
+      if index is 5
+        # 5. **x*x
+        clone.splice 4, 1
+        clone.splice 2, 1
+      if index is 6
+        # 6. ***xx
+        clone.splice 3, 2
+      if index is 7
+        # 7. *x*x*
+        clone.splice 3, 1
+        clone.splice 1, 1
+      if index is 8
+        # 8. *xx**
+        clone.splice 1, 2
+      if index is 9
+        clone.splice 2, 2
+        # 9. **xx*
+      triplets.push clone
+  return triplets
+
+getStraightTriplets = ->
+  straightTriplets = []
+  allStraights.forEach ( straight ) ->
+    singleStraightTriplets = getTriplets straight
+    singleStraightTriplets.forEach ( triplet ) ->
+      tripletString = JSON.stringify triplet
+      straightTriplets.push tripletString
+      return
+    return
+  # Don't need to parse, using JSON.stringify for comparison
+  return straightTriplets.reduce( unique, [] ).map parse
+
+find3toStraightFlush = ( _hand ) ->
+  result = {}
+  result.foundIt = false
+  result.suit = ''
+  flush = getFlushCards _hand
+  triplets = getTriplets _hand
+  if flush.cards.length > 2
+    triplets.forEach ( hand_triplet, idx ) ->
+      handTripletString = JSON.stringify getCardValuesOrdered hand_triplet
+      getStraightTriplets().forEach ( straight_triplet ) ->
+        straightTripletString = JSON.stringify straight_triplet
+        if straightTripletString is handTripletString
+          flushCards = getFlushCards hand_triplet
+          # console.log 'MATCH', straightTripletString, hand_triplet, flushCards
+          if flushCards.suit
+            # Certianly have 3 flush cards, so hold em
+            result.suit = flushCards.suit
+            result.foundIt = true
+        return
+      return
+  return result
 
 simpleStrategy = ->
   result = {}
@@ -267,6 +368,7 @@ simpleStrategy = ->
     return result
 
   # 6. High pair
+  # !!! 2 10's is not a high pair!
   if score.status is 'jacksbetter'
     holdDupes _hand, 2
     result.rule = '6. high pair'
@@ -311,8 +413,11 @@ simpleStrategy = ->
   #   return result
 
   # 12. 3 to a straight flush
-  # @todo
-
+  rule12 = find3toStraightFlush _hand
+  if rule12.foundIt
+    holdSuit _hand, rule12.suit
+    result.rule = '12. 3 to a straight flush'
+    return result
 
   # 13. 2 unsuited high cards (if more than 2 then pick the lowest 2)
   # !!! INCOMPLETE
@@ -325,7 +430,6 @@ simpleStrategy = ->
   #   console.log _hand
   #   if
   #   return result
-
 
   # 14. Suited 10/J, 10/Q, or 10/K
   # @todo

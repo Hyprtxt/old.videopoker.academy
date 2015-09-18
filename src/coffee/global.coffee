@@ -31,11 +31,11 @@ holdIndex = ( hand, indexArrayToHold ) ->
   return
 
 holdAllExcept = ( hand, index ) ->
-  console.log hand, index
+  # console.log hand, index
   hand.forEach ( card, i ) ->
     if i isnt index
       card.hold()
-    console.log card, i, index
+    # console.log card, i, index
     return
   renderHand hand
   return
