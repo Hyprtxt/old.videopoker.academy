@@ -54,8 +54,28 @@ unique = ( a, b ) ->
     a.push b
   return a
 
+loHi = ( a, b ) ->
+  return a - b
+
 parse = ( string ) ->
   return JSON.parse string
+
+# stringify = ( thing ) ->
+#   return JSON.stringify thing
+
+stringifyOpts = ( thing ) ->
+  return JSON.stringify thing.opts
+
+resurrectCard = ( card ) ->
+  return new Card card.opts
+
+holdCard = ( card ) ->
+  card.hold()
+  return
+
+holdCards = ( thing ) ->
+  thing.cards.forEach holdCard
+  renderHand _hand
 
 fourOfStraights = ->
   result = []
@@ -93,8 +113,7 @@ copyAndRemoveSingleCard = ( array, index ) ->
   copy = JSON.parse JSON.stringify array
   result = copy.splice index, 1
   # console.log copy, result
-  hand = copy.map ( card ) ->
-    return new Card card.opts
+  hand = copy.map resurrectCard
   return hand
 
 handsWithFourCards = ( hand ) ->
@@ -106,27 +125,38 @@ handsWithFourCards = ( hand ) ->
   hands.push copyAndRemoveSingleCard hand, 4
   return hands
 
+sameCard = ( card1, card2 ) ->
+  stringOne = JSON.stringify card1.opts
+  stringTwo = JSON.stringify card2.opts
+  if stringOne is stringTwo
+    return true
+  else
+    return false
+  return
+
 getCardValuesOrdered = ( hand ) ->
   values = hand.map ( card ) ->
     return card.value
-  return values.sort ( a, b ) ->
-    return a - b
+  return values.sort loHi
 
 getRoyalFlushCards = ( royal, flush ) ->
   royalFlush =
     cards: []
     suit: flush.suit
-  royal.cards.forEach ( cardindex ) ->
-    if flush.cards.indexOf( cardindex ) isnt -1
-      royalFlush.cards.push( cardindex )
-    return
+  if flush.cards.length isnt 0
+    royal.cards.forEach ( royalCard ) ->
+      flush.cards.forEach ( flushCard ) ->
+        if sameCard royalCard, flushCard
+          royalFlush.cards.push( royalCard )
+        return
+      return
   return royalFlush
 
 getHighCards = ( hand ) ->
   high =
     cards: []
   highCards = [10,11,12,0]
-  hand.forEach ( card, i ) ->
+  hand.forEach ( card ) ->
     highCards.forEach ( val ) ->
       if card.opts.value is val
         high.cards.push( card )
@@ -138,10 +168,10 @@ getRoyalCards = ( hand ) ->
   royal =
     cards: []
   royalCards = [0,9,10,11,12]
-  hand.forEach ( card, i ) ->
+  hand.forEach ( card ) ->
     royalCards.forEach ( val ) ->
       if card.opts.value is val
-        royal.cards.push( i )
+        royal.cards.push( card )
       return
     return
   return royal
@@ -153,7 +183,7 @@ getFlushCards = ( hand ) ->
   [0..3].forEach ( v ) ->
     count = 0
     cards = []
-    hand.forEach ( card, idx ) ->
+    hand.forEach ( card ) ->
       if card.opts.suit == v
         count++
         cards.push( card )
@@ -163,6 +193,13 @@ getFlushCards = ( hand ) ->
       flush.suit = v
     return
   return flush
+
+getSuitCards = ( hand, suit ) ->
+  cards = hand.filter ( card ) ->
+    if card.suit is suit
+      return true
+    return false
+  return cards
 
 getStraightOutlier = ( hand, type = 'all' ) ->
   result = {}
@@ -293,6 +330,26 @@ find3toStraightFlush = ( _hand ) ->
       return
   return result
 
+get2SuitedHighCards = ( hand ) ->
+  # Double 2 suited high cards is always an outside straight
+  # so this function returns the last 2 suited high cards found
+  result = {}
+  result.success = false
+  result.cards = []
+  high = getHighCards hand
+  if high.cards.length > 1
+    [0..3].forEach ( idx ) ->
+      suitCards = getSuitCards hand, idx
+      highCards = getHighCards suitCards
+      # console.log highCards, highCards.cards.length, 'rule 11'
+      if highCards.cards.length > 1
+        result.cards = highCards.cards
+        result.success = true
+      return
+  if result.success
+    holdCards result
+  return result
+
 simpleStrategy = ->
   result = {}
   result.rule = 'Error! No rules applied'
@@ -301,19 +358,19 @@ simpleStrategy = ->
   # 1. Royal Flush
   if score.status is 'royalflush'
     holdAll _hand
-    result.rule = '1. Hold - royalflush'
+    result.rule = '1.1 Hold - royalflush'
     return result
 
   # 1. Straight Flush
   if score.status is 'straightflush'
     holdAll _hand
-    result.rule = '1. Hold - straightflush'
+    result.rule = '1.2 Hold - straightflush'
     return result
 
   # 1. 4 of a Kind
   if score.status is '4kind'
     holdDupes hand, 4
-    result.rule = '1. Hold - 4kind'
+    result.rule = '1.3 Hold - 4kind'
     return result
 
   # 2. Hold 4 to royal flush
@@ -321,32 +378,32 @@ simpleStrategy = ->
   royal = getRoyalCards _hand
   royalFlush = getRoyalFlushCards royal, flush
   if royalFlush.cards.length > 3
-    holdIndex _hand, royal.cards
+    holdCards royalFlush
     result.rule = '2. 4 to a royal flush'
     return result
 
   # 3. 3 of a Kind
   if score.status is '3kind'
     holdDupes _hand, 3
-    result.rule = '3. Hold - 3kind'
+    result.rule = '3.1 Hold - 3kind'
     return result
 
   # 3. Straight
   if score.status is 'straight'
     holdAll _hand
-    result.rule = '3. Hold - straight'
+    result.rule = '3.2 Hold - straight'
     return result
 
   # 3. Flush
   if score.status is 'flush'
     holdAll _hand
-    result.rule = '3. Hold - flush'
+    result.rule = '3.3 Hold - flush'
     return result
 
   # 3. Full House
   if score.status is 'fullhouse'
     holdAll _hand
-    result.rule = '3. Hold - fullhouse'
+    result.rule = '3.4 Hold - fullhouse'
     return result
 
   # 4. 4 to straight flush
@@ -368,18 +425,14 @@ simpleStrategy = ->
     return result
 
   # 6. High pair
-  # !!! 2 10's is not a high pair!
   if score.status is 'jacksbetter'
     holdDupes _hand, 2
     result.rule = '6. high pair'
     return result
 
   # 7. 3 to a royal flush
-  # !!! holds too many cards when high non flush cards present
   if royalFlush.cards.length > 2
-    # need to cross check royal.cards and flush.cards
-    # only save the dupes
-    holdIndex _hand, royal.cards
+    holdCards royalFlush
     result.rule = '7. 3 to a royal flush'
     return result
 
@@ -403,14 +456,10 @@ simpleStrategy = ->
     return result
 
   # 11. 2 suited high cards
-  high = getHighCards _hand
-  # if high.cards.length > 1
-  #   # THINK: 3 high, 2 suited
-  #   result.rule = '11. 2 suited high cards'
-  #   # console.log high.cards
-  #   high.cards.forEach ( card ) ->
-  #     console.log card
-  #   return result
+  rule11 = get2SuitedHighCards _hand
+  if rule11.success
+    result.rule = '11. 2 suited high cards'
+    return result
 
   # 12. 3 to a straight flush
   rule12 = find3toStraightFlush _hand
@@ -421,23 +470,27 @@ simpleStrategy = ->
 
   # 13. 2 unsuited high cards (if more than 2 then pick the lowest 2)
   # !!! INCOMPLETE
+  high = getHighCards _hand
   if high.cards.length is 2
-    result.rule = '13. 2 unsuited high cards (if more than 2 then pick the lowest 2)'
-    holdIndex _hand, high.cards
+    holdCards high
+    result.rule = '13.1 2 unsuited high cards'
     return result
-  # if high.cards.length > 1
-  #   result.rule = '13. 2 unsuited high cards (if more than 2 then pick the lowest 2)'
-  #   console.log _hand
-  #   if
-  #   return result
+  if high.cards.length > 2
+    console.log high, 'Rule13.2  Pick lowest 2 High Cards'
+    result.rule = '13.2 2 unsuited high cards (if more than 2 then pick the lowest 2)'
+    # hold the lowest 2 high cards
+    return result
 
   # 14. Suited 10/J, 10/Q, or 10/K
+  # !!! INCOMPLETE
   # @todo
 
   # 15. One high card
+  # only one high card available because rule 13
   if high.cards.length is 1
     result.rule = '15. One high card'
-    holdIndex _hand, high.cards
+    high.cards[0].hold()
+    renderHand _hand
     return result
 
   # 16. Discard everything
