@@ -129,7 +129,7 @@ getHighCards = ( hand ) ->
   hand.forEach ( card, i ) ->
     highCards.forEach ( val ) ->
       if card.opts.value is val
-        high.cards.push( i )
+        high.cards.push( card )
       return
     return
   return high
@@ -156,7 +156,7 @@ getFlushCards = ( hand ) ->
     hand.forEach ( card, idx ) ->
       if card.opts.suit == v
         count++
-        cards.push( idx )
+        cards.push( card )
       return
     if cards.length > 2
       flush.cards = cards
