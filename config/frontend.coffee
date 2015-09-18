@@ -9,7 +9,7 @@ module.exports =
     '/js/poker.js'
     '/js/script.js'
     '/js/events.js'
-    '/js/test.js'
+    # '/js/test.js'
   ]
   stylesheets: [
     '/css/font-awesome.css'
