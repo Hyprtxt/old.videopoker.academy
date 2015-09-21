@@ -197,6 +197,24 @@ exports.register = ( server, options, next ) ->
               suit: 0
               value: 8
             ]
+        if data is '3toStraightFlushAlt'
+          test = new Hand
+            cards: [
+              suit: 0
+              value: 4
+            ,
+              suit: 2
+              value: 8
+            ,
+              suit: 0
+              value: 5
+            ,
+              suit: 0
+              value: 3
+            ,
+              suit: 3
+              value: 9
+            ]
         if data is 'suited10Q'
           test = new Hand
             cards: [

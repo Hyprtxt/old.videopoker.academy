@@ -204,7 +204,8 @@ getSuitCards = ( hand, suit ) ->
 handHasValue = ( hand, value ) ->
   values = getCardValuesOrdered hand
   result = false
-  if values.indexOf value
+  hasValue = values.indexOf value
+  if hasValue isnt -1
     result = true
   return result
 
@@ -323,14 +324,15 @@ find3toStraightFlush = ( _hand ) ->
   triplets = getTriplets _hand
   if flush.cards.length > 2
     triplets.forEach ( hand_triplet, idx ) ->
-      handTripletString = JSON.stringify getCardValuesOrdered hand_triplet
+      handTripletString = JSON.stringify getCardValuesOrdered( hand_triplet )
       getStraightTriplets().forEach ( straight_triplet ) ->
         straightTripletString = JSON.stringify straight_triplet
         if straightTripletString is handTripletString
           flushCards = getFlushCards hand_triplet
-          # console.log 'MATCH', straightTripletString, hand_triplet, flushCards
-          if flushCards.suit
+          # console.log 'MATCH', straightTripletString, hand_triplet, flushCards, flushCards.cards.length
+          if flushCards.cards.length is 3
             # Certianly have 3 flush cards, so hold em
+            # Don't have 4 of suit because rule8
             result.suit = flushCards.suit
             result.foundIt = true
         return
@@ -496,7 +498,7 @@ simpleStrategy = ->
       holdCards filteredHigh
     # remove kings
     doubleFilteredHigh.cards = filteredHigh.cards.filter ( card ) ->
-      console.log card.value
+      # console.log card.value
       if card.value isnt 12
         return true
       else
@@ -512,13 +514,23 @@ simpleStrategy = ->
   # Only ever one 10, because pair would be held
   high = getHighCards _hand
   if high.cards.length > 0
-    if handHasValue _hand, 9 # has a 10?
-      _hand.forEach ( card ) ->
-        if card.value is 9
-          card.hold()
-      holdCards high
-      result.rule = '14. Suited 10/J, 10/Q, or 10/K'
-      return result
+    cardT = handHasValue _hand, 9 # T
+    if cardT
+      [0..3].forEach ( idx ) ->
+        suitCards = getSuitCards _hand, idx
+        suitCardT = handHasValue suitCards, 9 # T
+        if suitCardT
+          suitCardJ = handHasValue suitCards, 10 # J
+          suitCardQ = handHasValue suitCards, 11 # Q
+          suitCardK = handHasValue suitCards, 12 # K
+          if suitCardJ || suitCardQ || suitCardK
+            _hand.forEach ( card ) ->
+              if card.value is 9
+                card.hold()
+              return
+            holdCards high
+            result.rule = '14. Suited 10/J, 10/Q, or 10/K'
+            return result
 
   # 15. One high card
   # only one high card available because rule 13

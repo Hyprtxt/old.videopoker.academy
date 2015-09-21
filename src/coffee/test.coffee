@@ -5,5 +5,5 @@ $buttons.append $testBtn
 $test = $ '.test'
 
 $test.on 'click', ->
-  socket.emit 'test', 'lowUnsuited'
+  socket.emit 'test', '3toStraightFlushAlt'
   return
