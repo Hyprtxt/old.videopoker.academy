@@ -16,8 +16,11 @@ $simple = $ '.simple'
 
 _$events.on 'new_game', ->
   $simple.removeAttr 'hidden'
+  $rule.text ''
   $simple.on 'click', ->
+    clearHolds _hand
     result = simpleStrategy()
+    $rule.text result.rule
     console.log result
     return
 
@@ -68,6 +71,11 @@ stringifyOpts = ( thing ) ->
 
 resurrectCard = ( card ) ->
   return new Card card.opts
+
+clearHolds = ( hand ) ->
+  hand.forEach ( card ) ->
+    card.drop()
+    return
 
 holdCard = ( card ) ->
   card.hold()

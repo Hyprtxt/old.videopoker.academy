@@ -4,6 +4,7 @@ _hand = []
 
 # DOM Globals
 $buttons = $ '.buttons'
+$rule = $ '.rule'
 
 # DOM Binding Helper
 

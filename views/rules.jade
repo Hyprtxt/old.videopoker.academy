@@ -1,0 +1,61 @@
+extends ./layouts/layout.jade
+
+block content
+  .row
+    .col-sm-12
+      h2 Video poker simple strategy
+      p These rules are from the 
+        a(href='http://wizardofodds.com/games/video-poker/strategy/jacks-or-better/9-6/simple/') Simple Strategy
+        |  at 
+        a(href='http://wizardofodds.com/') Wizard of Odds
+        | .
+      ol
+        li Four of a kind, straight flush, royal flush
+        li 4 to a royal flush
+        li Three of a kind, straight, flush, full house
+        li 4 to a straight flush
+        li Two pair
+        li High pair
+        li 3 to a royal flush
+        li 4 to a flush
+        li Low pair
+        li 4 to an outside straight
+        li 2 suited high cards
+        li 3 to a straight flush
+        li 2 unsuited high cards (if more than 2 then pick the lowest 2)
+        li Suited 10/J, 10/Q, or 10/K
+        li One high card
+        li Discard everything
+      h4 Terms
+      p 
+        strong High card: 
+        | A jack, queen, king, or ace. These cards are retained more often because if paired up they return the original bet.
+      p 
+        strong Outside straight: 
+        | An open ended straight that can be completed at either end, such as the cards 7,8,9,10.
+      p
+        strong Inside straight: 
+        | A straight with a missing inside card, such as the cards 6,7,9,10. In addition A,2,3,4 andJ,Q,K,A also count as inside straights because they are at an extreme end.
+
+      //- p 1.1 Hold royal flush
+      //- p 1.2 Hold straight flush
+      //- p 1.3 Hold 4 of a kind
+      //- p 2. 4 to a royal flush
+      //- p 3.1 Hold 3 of a kind
+      //- p 3.2 Hold straight
+      //- p 3.3 Hold flush
+      //- p 3.4 Hold fullhouse
+      //- p 4. 4 to straight flush
+      //- p 5. Hold 2 pair
+      //- p 6. Hold high pair
+      //- p 7. 3 to a royal flush
+      //- p 8. 4 to a flush
+      //- p 9. Hold the low pair
+      //- p 10. 4 to an outside straight
+      //- p 11. 2 suited high cards
+      //- p 12. 3 to a straight flush
+      //- p 13.1 2 unsuited high cards
+      //- p 13.2 2 unsuited high cards (if more than 2 then pick the lowest 2)
+      //- p 14. Suited 10/J, 10/Q, or 10/K
+      //- p 15. One high card
+      //- p 16. Hold nothing

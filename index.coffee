@@ -28,6 +28,17 @@ server.route
       reply.view 'index', request.pre
       return
 
+# Rules Page
+server.route
+  method: 'GET'
+  path: '/rules'
+  config:
+    auth: 'session'
+    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    handler: ( request, reply ) ->
+      reply.view 'rules', request.pre
+      return
+
 server.route
   method: 'GET'
   path: '/db'
