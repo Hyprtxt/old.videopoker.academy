@@ -61,7 +61,10 @@ server.route
     plugins:
       'hapi-auth-cookie':
         redirectTo: false
-    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    pre: [
+      server.plugins['jadeHelper'].jadeRouteSetup
+      server.plugins['jadeAuthHelper'].jadeLoginRouteSetup
+    ]
     handler: ( request, reply ) ->
       reply.view 'login', request.pre
       return

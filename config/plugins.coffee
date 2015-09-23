@@ -12,6 +12,9 @@ module.exports = [
   # jade helper
     register: require('../plugins/jadeHelper')
   ,
+  # jade auth helper
+    register: require('../plugins/jadeAuthHelper')
+  ,
   # social login
     register: require('bell')
   ,

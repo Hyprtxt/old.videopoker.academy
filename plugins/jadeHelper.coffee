@@ -4,7 +4,7 @@ exports.register = ( server, options, next ) ->
     request.pre.auth = request.auth
     request.pre.session = request.auth.artifacts
     return reply()
-  next()
+  return next()
 
 exports.register.attributes =
   name: 'jadeHelper'

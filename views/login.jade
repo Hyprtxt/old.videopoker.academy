@@ -9,23 +9,15 @@ block content
   .container
     .row
       .col-sm-12
-        p Hello World
-        p 
-          a.btn.btn-info-outline(href='/login/twitter') Login with 
-            i.fa.fa-twitter
-        p 
-          a.btn.btn-danger-outline(href='/login/google') Login with 
-            i.fa.fa-google
-        p 
-          a.btn.btn-warning-outline(href='/login/github') Login with 
-            i.fa.fa-github
-        p 
-          a.btn.btn-primary-outline(href='/login/facebook') Login with 
-            i.fa.fa-facebook
+        p Hello
+        each login, idx in socialLogin
+          p
+            a.btn(href=login.callbackURL, class=login.btn) Login with #{login.name} 
+              i.fa(class=login.icon)
         p 
           if auth.isAuthenticated
             span You are logged in!
           else
-            span You are NOT welcome, yet. Please login.
+            span Please login
 
 block foot
