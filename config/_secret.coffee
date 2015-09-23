@@ -9,12 +9,24 @@ store = new Confidence.Store
       route:
         twitter:
           callbackURL: '/login/twitter'
+          btn: 'btn-info-outline'
+          icon: 'fa-twitter'
+          name: 'Twitter'
         google:
           callbackURL: '/login/google'
+          btn: 'btn-danger-outline'
+          icon: 'fa-google'
+          name: 'Google'
         github:
           callbackURL: '/login/github'
+          btn: 'btn-warning-outline'
+          icon: 'fa-github'
+          name: 'Github'
         facebook:
           callbackURL: '/login/facebook'
+          btn: 'btn-primary-outline'
+          icon: 'fa-facebook'
+          name: 'Facebook'
     production:
       twitter:
         clientId: ''
