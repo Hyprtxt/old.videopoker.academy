@@ -24,9 +24,6 @@ module.exports = [
   # combines social login with sessions
     register: require('../plugins/auth')
   ,
-  # database
-    register: require('../plugins/mysql')
-  ,
   # sockets
     register: require('../plugins/sockets')
   ,
