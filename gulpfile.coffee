@@ -61,6 +61,8 @@ gulp.task 'reload', ->
   livereload.reload()
   return
 
+gulp.task 'build', ['copystyle', 'sass', 'copyjs', 'coffee']
+
 gulp.task 'watch', ['copystyle', 'sass', 'copyjs', 'coffee'], ->
   livereload.listen
     basePath: './src'
