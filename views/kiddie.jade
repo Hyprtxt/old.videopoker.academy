@@ -1,0 +1,26 @@
+extends ./layouts/layout.jade
+
+block content
+  .row
+    .col-sm-12
+      h2 Let's play some Video Poker!
+      p.result Do your best
+      p Rule: 
+        span.rule
+      .hand
+        .card.card-1
+        .card.card-2
+        .card.card-3
+        .card.card-4
+        .card.card-5
+      .buttons
+        a.btn.btn-primary.deal New Game
+        a.btn.btn-primary.draw Draw
+
+block data
+  script.
+    var mode = 'kiddie';
+
+block script
+  script(src='/js/kiddie.js')
+  script(src='/js/simple.js')

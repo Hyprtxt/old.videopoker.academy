@@ -5,7 +5,7 @@ module.exports =
     '/js/jquery.min.js'
     '/js/global.js'
     '/js/card.js'
-    '/js/simple.js'
+    # '/js/simple.js'
     '/js/poker.js'
     '/js/script.js'
     '/js/events.js'
@@ -16,7 +16,7 @@ module.exports =
     '/css/style.css'
   ]
   navbarBrand:
-    title: 'Hyprtxt'
+    title: 'Hyprtxt Video Poker'
     link: '/'
   navigation: [
     title: 'Simple Strategy Rules'

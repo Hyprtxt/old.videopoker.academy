@@ -8,26 +8,6 @@
 
 console.log 'simple strategy loaded'
 
-$simpleBtn = $ '<a>'
-  .addClass 'btn btn-primary simple'
-  .text 'AUTO: Simple Strategy'
-$buttons.append $simpleBtn
-$simple = $ '.simple'
-
-_$events.on 'new_game', ->
-  $simple.removeAttr 'hidden'
-  $rule.text ''
-  $simple.on 'click', ->
-    clearHolds _hand
-    result = simpleStrategy()
-    $rule.text result.rule
-    console.log result
-    return
-
-_$events.on 'game_complete', ->
-  $simple.attr 'hidden', true
-  $simple.off 'click'
-
 outsideStraights = [
   [1,2,3,4]
   [2,3,4,5]

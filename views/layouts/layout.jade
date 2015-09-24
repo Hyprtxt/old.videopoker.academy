@@ -14,5 +14,16 @@ html
         
     .container
       block content
+    
     block foot
       include ./includes/foot.jade
+
+    block data
+
+    block global
+      script.
+        var session=!{JSON.stringify( session )}
+      each script in javascripts
+        script(src=script)
+
+    block script

@@ -1,3 +1,5 @@
+console.log 'MODE: ' + mode
+
 # inner global
 _hand = _hand
 
@@ -11,6 +13,7 @@ socket
     return
   .on 'disconnect', ->
     console.log 'disconnected'
+    alert 'disconnected from server, please refresh the page and have patience with technical issues'
     return
   .on 'cards', ( data ) ->
     init = false

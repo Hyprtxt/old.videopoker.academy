@@ -28,6 +28,39 @@ server.route
       reply.view 'index', request.pre
       return
 
+# Classic Mode
+server.route
+  method: 'GET'
+  path: '/classic'
+  config:
+    auth: 'session'
+    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    handler: ( request, reply ) ->
+      reply.view 'classic', request.pre
+      return
+
+# Kiddie Mode
+server.route
+  method: 'GET'
+  path: '/kiddie'
+  config:
+    auth: 'session'
+    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    handler: ( request, reply ) ->
+      reply.view 'kiddie', request.pre
+      return
+
+# Trainer Mode
+server.route
+  method: 'GET'
+  path: '/trainer'
+  config:
+    auth: 'session'
+    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    handler: ( request, reply ) ->
+      reply.view 'trainer', request.pre
+      return
+
 # Rules Page
 server.route
   method: 'GET'

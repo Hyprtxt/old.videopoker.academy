@@ -17,6 +17,11 @@ addHoldEvents = ->
 removeHoldEvents = ->
   $hand.off 'click', '.card'
 
+getHoldStatus = ->
+  result = []
+  return _hand.map ( card ) ->
+    return card.held
+
 $deal.on 'click', ->
   socket.emit 'deal'
   _$events.trigger 'new_game'
@@ -30,6 +35,22 @@ $draw.on 'click', ->
 
 _$events.on 'game_complete', ->
   # console.log _hand, 'game_complete'
+  if mode is 'trainer'
+    console.log getHoldStatus(), 'pre'
+    pre = getHoldStatus()
+    clearHolds _hand
+    result = simpleStrategy()
+    $rule.text result.rule
+    post = getHoldStatus()
+    console.log getHoldStatus(), 'post'
+    console.log result
+    if JSON.stringify( pre ) isnt JSON.stringify( post )
+      # _$events.trigger 'game_over'
+      alert 'Game Over! Correct move was rule ' + result.rule
+      window.location.href = '/'
+      return
+  else
+    console.log 'not trainer'
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
@@ -41,3 +62,9 @@ _$events.on 'new_game', ->
   $draw.removeAttr 'hidden'
   addHoldEvents()
   return
+
+# _$events.on 'game_over', ->
+#   alert 'Game Over!'
+#   window.location.href = '/'
+#   removeHoldEvents()
+#   return
