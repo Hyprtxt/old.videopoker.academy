@@ -26,3 +26,10 @@ Cool stuff!
 * LiveReload (Via Chrome Extension)
 
 files in the `./src` directory are compiled and output to the `./static_generated` directory
+
+Install NVM
+
+```
+sudo apt-get install build-essential
+forever start --uid "auth.hyprtxt.com" --append -c ./node_modules/coffee-script/bin/coffee index.coffee
+```

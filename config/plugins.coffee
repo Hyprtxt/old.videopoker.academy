@@ -1,4 +1,5 @@
 Path = require('path')
+loggly = require('./secret').get('/loggly')
 
 # This file is fed to server.require()
 
@@ -42,5 +43,12 @@ module.exports = [
           log: '*'
           response: '*'
         config: Path.join( __dirname, '../log', 'good.log' )
+      ,
+        reporter: require('good-loggly')
+        events:
+          log: '*'
+          response: '*'
+          request: '*'
+        config: loggly
       ]
 ]

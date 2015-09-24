@@ -1,6 +1,12 @@
 Confidence = require('confidence')
 
 store = new Confidence.Store
+  loggly:
+    token     : '',
+    subdomain : '',
+    name      : 'hypr-hapi',
+    hostname  : 'auth.hyprtxt.com'
+    tags      : ['hapi']
   socialAuth:
     $filter: 'env'
     $base:
