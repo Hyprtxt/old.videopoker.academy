@@ -72,6 +72,17 @@ server.route
       reply.view 'rules', request.pre
       return
 
+# Profile Page
+server.route
+  method: 'GET'
+  path: '/profile'
+  config:
+    auth: 'session'
+    pre: [ server.plugins['jadeHelper'].jadeRouteSetup ]
+    handler: ( request, reply ) ->
+      reply.view 'profile', request.pre
+      return
+
 server.route
   method: 'GET'
   path: '/login'

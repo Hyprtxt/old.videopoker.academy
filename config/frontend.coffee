@@ -24,5 +24,8 @@ module.exports =
   ,
     title: 'Logout'
     link: '/logout'
+  # ,
+  #   title: 'Profile'
+  #   link: '/profile'
   ]
   timestamp: new Date()
