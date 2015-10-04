@@ -22,7 +22,7 @@ exports.register = ( server, options, next ) ->
   _sessionManagement = ( request, reply ) ->
     if !request.auth.isAuthenticated
       return reply('Authentication failed due to: ' + request.auth.error.message);
-    # console.log request.auth, 'AUTH'
+    console.log request.auth, 'AUTH'
     self = this
     account = request.auth.credentials
     sid = '' + account.profile.id
@@ -30,29 +30,42 @@ exports.register = ( server, options, next ) ->
       sql: 'SELECT * FROM `users` WHERE ?',
       timeout: 40000, # 40s
       values: [
-        email: account.profile.email
+        sid: sid
       ]
     }
     server.plugins['mysql'].query getQuery, ( rows ) ->
       console.log rows, 'rows', rows.length
       if rows.length is 0
         # Create User
-        picURL = 'https://graph.facebook.com/' + account.profile.id + '/picture?width=30&height=30'
+        if account.provider is 'facebook'
+          picURL = 'https://graph.facebook.com/' + account.profile.id + '/picture?width=50&height=50'
+          emailAddress = account.profile.email
+        if account.provider is 'google'
+          picURL = account.profile.raw.image.url
+          emailAddress = account.profile.emails[0].value
+          # console.log account.profile.raw
         createQuery = {
           sql: 'INSERT INTO `users` SET ?',
           timeout: 40000, # 40s
           values: [
             sid: sid
             displayName: account.profile.displayName
-            email: account.profile.email
+            email: emailAddress
             provider: account.provider
             pic: picURL
           ]
         }
         server.plugins['mysql'].query createQuery, ( rows ) ->
-          # console.log rows
+          console.log rows
           if rows.affectedRows is 1
             console.log 'Account Created'
+            # createdQuery = {
+            #   sql: 'SELECT * FROM `users` WHERE ?',
+            #   timeout: 40000, # 40s
+            #   values: [
+            #     sid: sid
+            #   ]
+            # }
             server.plugins['mysql'].query getQuery, ( rows ) ->
               if rows.length is 1
                 self.cache.set sid, account: rows, null, ( err ) ->
