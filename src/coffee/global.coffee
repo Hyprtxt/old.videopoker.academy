@@ -4,10 +4,13 @@ _hand = []
 
 # DOM Globals
 $buttons = $ '.buttons'
+$credits = $ '.credits'
 $rule = $ '.rule'
+$hand = $ '.hand'
+$deal = $ '.deal'
+$draw = $ '.draw'
 
-# DOM Binding Helper
-
+# DOM Binding Helpers
 renderHand = ( hand ) ->
   hand.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
@@ -20,16 +23,30 @@ renderHand = ( hand ) ->
     return
   return
 
+updateCreds = ( amount ) ->
+  creds = parseInt $credits.text()
+  # console.log creds, amount
+  $credits.text creds + amount
+  # console.log $credits.text
+  return
+
+# something...
+clearHolds = ( hand ) ->
+  hand.forEach ( card ) ->
+    card.drop()
+    return
+
 # AUTO Strategy Functions
 
-holdIndex = ( hand, indexArrayToHold ) ->
-  hand.forEach ( card, idx ) ->
-    # console.log idx, indexArrayToHold, indexArrayToHold.indexOf idx
-    if indexArrayToHold.indexOf(idx) isnt -1
-      card.hold()
-    return
-  renderHand hand
-  return
+# This utility was replaced by card.hold()
+# holdIndex = ( hand, indexArrayToHold ) ->
+#   hand.forEach ( card, idx ) ->
+#     # console.log idx, indexArrayToHold, indexArrayToHold.indexOf idx
+#     if indexArrayToHold.indexOf(idx) isnt -1
+#       card.hold()
+#     return
+#   renderHand hand
+#   return
 
 holdAllExcept = ( hand, index ) ->
   # console.log hand, index

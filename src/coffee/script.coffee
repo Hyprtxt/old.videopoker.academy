@@ -30,5 +30,6 @@ socket
       _$events.trigger 'new_game'
     return
   .on 'score', ( data ) ->
+    updateCreds data.win
     console.log data
     $result.text data.status + ' win:' + data.win

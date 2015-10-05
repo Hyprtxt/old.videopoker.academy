@@ -5,7 +5,7 @@ module.exports =
     '/js/jquery.min.js'
     '/js/global.js'
     '/js/card.js'
-    # '/js/simple.js'
+    '/js/simple.js'
     '/js/poker.js'
     '/js/script.js'
     '/js/events.js'

@@ -5,6 +5,7 @@ block content
     .col-sm-12
       h2 Let's play some Video Poker!
       p.result Do your best
+      p.credits=user.trainerCreds
       p Rule: 
         span.rule
       .hand
@@ -21,5 +22,5 @@ block data
   script.
     var mode = 'trainer';
 
-block script
-  script(src='/js/simple.js')
+//- block script
+//-   script(src='')

@@ -1,10 +1,6 @@
 # inner global
-_hand = _hand
+# _hand = _hand
 console.log _hand, 'events'
-
-$hand = $ '.hand'
-$deal = $ '.deal'
-$draw = $ '.draw'
 
 holdEvent =  ->
   _hand[$(this).index()].holdToggle()
@@ -28,28 +24,29 @@ $deal.on 'click', ->
   return
 
 $draw.on 'click', ->
+  console.log getHoldStatus(), 'pre'
+  pre = getHoldStatus()
+  clearHolds _hand
+  result = simpleStrategy()
+  $rule.text result.rule
+  # post = getHoldStatus()
+  # console.log getHoldStatus(), 'post'
+  console.log result
+  # if JSON.stringify( pre ) isnt JSON.stringify( post )
   socket.emit 'draw', _hand
   _$events.trigger 'game_complete'
   return
 
 _$events.on 'game_complete', ->
   # console.log _hand, 'game_complete'
-  if mode is 'trainer'
-    console.log getHoldStatus(), 'pre'
-    pre = getHoldStatus()
-    clearHolds _hand
-    result = simpleStrategy()
-    $rule.text result.rule
-    post = getHoldStatus()
-    console.log getHoldStatus(), 'post'
-    console.log result
-    if JSON.stringify( pre ) isnt JSON.stringify( post )
-      # _$events.trigger 'game_over'
-      alert 'Game Over! Correct move was rule ' + result.rule
-      window.location.href = '/'
-      return
-  else
-    console.log 'not trainer'
+  # if mode is 'trainer'
+  #
+  #   # _$events.trigger 'game_over'
+  #   alert 'Game Over! Correct move was rule ' + result.rule
+  #   window.location.href = '/'
+  #   return
+  # else
+  #   console.log 'not trainer'
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
@@ -57,6 +54,7 @@ _$events.on 'game_complete', ->
 
 _$events.on 'new_game', ->
   # console.log _hand, 'new_game'
+  updateCreds -5
   $deal.attr 'hidden', true
   $draw.removeAttr 'hidden'
   addHoldEvents()

@@ -52,11 +52,6 @@ stringifyOpts = ( thing ) ->
 resurrectCard = ( card ) ->
   return new Card card.opts
 
-clearHolds = ( hand ) ->
-  hand.forEach ( card ) ->
-    card.drop()
-    return
-
 holdCard = ( card ) ->
   card.hold()
   return
