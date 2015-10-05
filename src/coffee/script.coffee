@@ -1,4 +1,4 @@
-console.log 'MODE: ' + mode
+console.log 'MODE: ' + mode, 'SID: ' + session.sid
 
 # inner global
 _hand = _hand
@@ -9,6 +9,7 @@ $result = $ '.result'
 
 socket
   .on 'connect', ->
+    socket.emit 'link', { mode: mode, sid: session.sid }
     console.log 'connected, ID:' + socket.io.engine.id
     return
   .on 'disconnect', ->

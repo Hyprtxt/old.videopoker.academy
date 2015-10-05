@@ -34,6 +34,24 @@ Card::isHigh = ->
     return true
   return false
 
+Card::valueOutput = ->
+  valueOutput = [
+    'A'
+    '2'
+    '3'
+    '4'
+    '5'
+    '6'
+    '7'
+    '8'
+    '9'
+    '10'
+    'J'
+    'Q'
+    'K'
+  ]
+  return valueOutput[@value]
+
 Card::valueLetter = ->
   valueLetter = [
     'A'
@@ -96,6 +114,9 @@ Card::color = ->
     return 'black'
 
 Card::text = ->
+  return @valueOutput() + @unicodeSuit()
+
+Card::databaseText = ->
   return @valueLetter() + @unicodeSuit()
 
 if typeof window is 'undefined'

@@ -1,5 +1,10 @@
 Hand = require '../modules/hand'
 Poker = require '../modules/poker'
+# Strategy = require '../mod'
+
+getHoldStatus = ( cards ) ->
+  return cards.map ( card ) ->
+    return card.held
 
 exports.register = ( server, options, next ) ->
   cache = server.cache
@@ -13,17 +18,35 @@ exports.register = ( server, options, next ) ->
   io = require('socket.io')(server.listener)
 
   io.on 'connection', ( socket ) ->
-    new_hand = new Hand()
+    # console.log 'CONNECTION', socket.request.headers
 
-    server.app.cache.set socket.id,
-      hand: new_hand
-    , null, ( err ) ->
-      if err
-        throw err
-      return
+    # server.app.cache.set socket.id,
+    #   hand: new_hand
+    # , null, ( err ) ->
+    #   if err
+    #     throw err
+    #   return
 
     socket
-      .emit 'cards', new_hand.cards
+      .on 'link', ( data ) ->
+        new_hand = new Hand()
+        getQuery = {
+          sql: 'SELECT * FROM `users` WHERE ?',
+          values: [
+            sid: data.sid
+          ]
+        }
+        server.plugins['mysql'].query getQuery, ( rows ) ->
+          server.app.cache.set socket.id,
+            user: rows[0]
+            mode: data.mode
+            hand: new_hand
+          , null, ( err ) ->
+            if err
+              throw err
+            socket.emit 'cards', new_hand.cards
+            return
+          return
       .on 'disconnect', ->
         console.log socket.id + ' disconnected'
         server.app.cache.drop socket.id, ( err ) ->
@@ -31,41 +54,62 @@ exports.register = ( server, options, next ) ->
             throw err
         return
       .on 'draw', ( data ) ->
+        ## Hand is over
         console.log 'draw for ' + socket.id
-        server.app.cache.get socket.id, ( err, value ) ->
+        server.app.cache.get socket.id, ( err, cache ) ->
           if err
             throw err
+          # console.log 'draw for ', cache
           hand = new Hand
-            deck: value.hand.deck.cards
-            size: value.hand.size
-            cards: value.hand.cards.map ( card ) ->
+            deck: cache.hand.deck.cards
+            size: cache.hand.size
+            cards: cache.hand.cards.map ( card ) ->
               return card.opts
+          startHand = hand.cards.map ( card ) ->
+            return card.databaseText()
+          pre = getHoldStatus( hand.cards )
           data.forEach ( card, i ) ->
             if !card.held
               hand.replace i
               console.log "Replaced " + i
             return
-          # console.log hand.cards
-          socket.emit 'cards', hand.cards
-
-          ## Scoring Here
-          socket.emit 'score', Poker hand.cards, 5
-
+          endHand = hand.cards.map ( card ) ->
+            return card.databaseText()
+          post = getHoldStatus( hand.cards )
+          # console.log pre, post
+          strategy = 1
+          if JSON.stringify( pre ) isnt JSON.stringify( post )
+            strategy = 0
+          console.log startHand, endHand, strategy
+          theCards = hand.cards
+          score = Poker hand.cards, 5
+          saveCards = {
+            sql: 'INSERT INTO `hands` SET ?',
+            values: [
+              user: cache.user.id
+              mode: cache.mode
+              start: startHand.join()
+              end: endHand.join()
+              win: score.win
+              status: score.status
+              strategy: strategy
+            ]
+          }
+          server.plugins['mysql'].query saveCards, ( rows ) ->
+            # console.log rows, 'saveCards rows'
+            socket.emit 'cards', theCards
+            socket.emit 'score', score
+            return
           return
         return
       .on 'deal', ( data ) ->
         console.log 'deal for ' + socket.id
-        server.app.cache.drop socket.id, ( err ) ->
-          if err
-            throw err
-          hand = new Hand()
-          # console.log hand
-          server.app.cache.set socket.id,
-            hand: hand
-          , null, ( err ) ->
+        server.app.cache.get socket.id, ( err, cache ) ->
+          cache.hand = new Hand()
+          server.app.cache.set socket.id, cache, null, ( err ) ->
             if err
               throw err
-            socket.emit('cards', hand.cards );
+            socket.emit('cards', cache.hand.cards );
             return
           return
         return

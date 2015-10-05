@@ -22,7 +22,7 @@ exports.register = ( server, options, next ) ->
   _sessionManagement = ( request, reply ) ->
     if !request.auth.isAuthenticated
       return reply('Authentication failed due to: ' + request.auth.error.message);
-    console.log request.auth, 'AUTH'
+    # console.log request.auth, 'AUTH'
     self = this
     account = request.auth.credentials
     sid = '' + account.profile.id
@@ -56,7 +56,7 @@ exports.register = ( server, options, next ) ->
           ]
         }
         server.plugins['mysql'].query createQuery, ( rows ) ->
-          console.log rows
+          # console.log rows
           if rows.affectedRows is 1
             console.log 'Account Created'
             # createdQuery = {

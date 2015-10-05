@@ -18,7 +18,6 @@ removeHoldEvents = ->
   $hand.off 'click', '.card'
 
 getHoldStatus = ->
-  result = []
   return _hand.map ( card ) ->
     return card.held
 

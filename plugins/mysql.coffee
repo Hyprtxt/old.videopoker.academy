@@ -22,9 +22,9 @@ exports.register = ( server, options, next ) ->
         callback rows
         return
       connection.on 'error', ( err ) ->
+        connection.off 'error'
         connection.release()
         server.log ['error', 'database', 'connection'], err
-        connection.off 'error'
         return
       return
     return
