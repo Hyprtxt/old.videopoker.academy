@@ -5,7 +5,7 @@ store = new Confidence.Store
   connectionConfig:
     $filter: 'env'
     production:
-      host: 'auth.hyprtxt.com'
+      host: 'localhost'
       port: 8001
     $default: # for devs
       host: 'auth.hyprtxt.dev'
