@@ -3,6 +3,7 @@
 # !!! This is a shared module, used both server and client side
 
 Card = ( options ) ->
+  delete options.opts
   @opts = options or {}
   @suit = @opts.suit or 0
   @value = @opts.value or 0
@@ -33,6 +34,24 @@ Card::isHigh = ->
   if @value is 12
     return true
   return false
+
+Card::valueOutput = ->
+  valueOutput = [
+    'A'
+    '2'
+    '3'
+    '4'
+    '5'
+    '6'
+    '7'
+    '8'
+    '9'
+    '10'
+    'J'
+    'Q'
+    'K'
+  ]
+  return valueOutput[@value]
 
 Card::valueLetter = ->
   valueLetter = [
@@ -96,6 +115,9 @@ Card::color = ->
     return 'black'
 
 Card::text = ->
+  return @valueOutput() + @unicodeSuit()
+
+Card::databaseText = ->
   return @valueLetter() + @unicodeSuit()
 
 if typeof window is 'undefined'

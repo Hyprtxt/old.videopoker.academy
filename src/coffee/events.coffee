@@ -1,67 +1,69 @@
 # inner global
-_hand = _hand
-console.log _hand, 'events'
-
-$hand = $ '.hand'
-$deal = $ '.deal'
-$draw = $ '.draw'
+_user = _user
+# console.log _user, 'events'
 
 holdEvent =  ->
-  _hand[$(this).index()].holdToggle()
-  renderHand _hand
+  # console.log $(this).index(), _user.hand.cards[$(this).index()]
+  _user.hand.cards[$(this).index()].holdToggle()
+  renderHand _user.hand _user.hand
   return
 
 addHoldEvents = ->
   $hand.on 'click', '.card', holdEvent
+  return
 
 removeHoldEvents = ->
   $hand.off 'click', '.card'
+  return
 
 getHoldStatus = ->
-  result = []
-  return _hand.map ( card ) ->
+  return _user.hand.cards.map ( card ) ->
     return card.held
 
 $deal.on 'click', ->
-  socket.emit 'deal'
-  _$events.trigger 'new_game'
+  console.log 'DEALLLLLLLL'
+  socket.emit 'deal', _user
   $result.text 'Do your best'
   return
 
 $draw.on 'click', ->
-  socket.emit 'draw', _hand
-  _$events.trigger 'game_complete'
+  socket.emit 'draw', _user
+  return
+
+_$events.on 'new_game', ->
+  console.log 'new_game'
+  # console.log _user
+  $deal.attr 'hidden', true
+  $draw.removeAttr 'hidden'
+  addHoldEvents()
   return
 
 _$events.on 'game_complete', ->
-  # console.log _hand, 'game_complete'
-  if mode is 'trainer'
-    console.log getHoldStatus(), 'pre'
-    pre = getHoldStatus()
-    clearHolds _hand
-    result = simpleStrategy()
-    $rule.text result.rule
-    post = getHoldStatus()
-    console.log getHoldStatus(), 'post'
-    console.log result
-    if JSON.stringify( pre ) isnt JSON.stringify( post )
-      # _$events.trigger 'game_over'
-      alert 'Game Over! Correct move was rule ' + result.rule
-      window.location.href = '/'
-      return
-  else
-    console.log 'not trainer'
+  console.log 'game_complete'
+  # console.log $draw, $deal
   $draw.attr 'hidden', true
   $deal.removeAttr 'hidden'
   removeHoldEvents()
   return
 
-_$events.on 'new_game', ->
-  # console.log _hand, 'new_game'
-  $deal.attr 'hidden', true
-  $draw.removeAttr 'hidden'
-  addHoldEvents()
-  return
+# console.log getHoldStatus(), 'pre'
+# pre = getHoldStatus()
+# clearHolds _user.hand
+# result = simpleStrategy()
+# $rule.text result.rule
+# post = getHoldStatus()
+# console.log getHoldStatus(), 'post'
+# console.log result
+# if JSON.stringify( pre ) isnt JSON.stringify( post )
+
+# console.log _user
+# if mode is 'trainer'
+#   # _$events.trigger 'game_over'
+#   alert 'Game Over! Correct move was rule ' + result.rule
+#   window.location.href = '/'
+#   return
+# else
+#   console.log 'not trainer'
 
 # _$events.on 'game_over', ->
 #   alert 'Game Over!'

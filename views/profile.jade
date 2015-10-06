@@ -1,0 +1,30 @@
+extends ./layouts/layout.jade
+
+block content
+  .row
+    .col-sm-12.col-md-9.col-lg-6
+      h2 Your Profile
+      form
+        fieldset.form-group
+          label(for='name') Name
+          input#name.form-control(disabled, value=user.displayName)
+        fieldset.form-group
+          label(for='email') Email Address
+          input#email.form-control(type='email', disabled, value=user.email)
+          small.text-muted We'll never share your email with anyone else.
+        fieldset.form-group
+          label(for='provider') Login Provider
+          input#provider.form-control(disabled, value=user.provider)
+        fieldset.form-group
+          label(for='classicCreds') Classic Mode Credits
+          input#classicCreds.form-control(disabled, value=user.classicCreds)
+        fieldset.form-group
+          label(for='kiddieCreds') Kiddie Mode Credits
+          input#kiddieCreds.form-control(disabled, value=user.kiddieCreds)
+        fieldset.form-group
+          label(for='kiddieCreds') Trainer Mode Credits
+          input#kiddieCreds.form-control(disabled, value=user.trainerCreds)
+      pre=JSON.stringify( user, null, 2 )
+      //- pre=JSON.stringify( auth.credentials.profile, null, 2 )
+
+block global

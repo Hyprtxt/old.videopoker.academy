@@ -1,33 +1,37 @@
-console.log 'MODE: ' + mode
+console.log 'MODE: ' + mode, 'SID: ' + session.sid
 
 # inner global
 _hand = _hand
+_user = _user
 
 socket = io '/'
 
 $result = $ '.result'
 
 socket
-  .on 'connect', ->
+  .on 'connect', (  ) ->
     console.log 'connected, ID:' + socket.io.engine.id
-    return
+    return socket.emit 'link', { mode: mode, sid: session.sid }
+  .on 'link_complete', ->
+    return console.log 'link_complete'
   .on 'disconnect', ->
     console.log 'disconnected'
-    alert 'disconnected from server, please refresh the page and have patience with technical issues'
-    return
-  .on 'cards', ( data ) ->
-    init = false
-    # is this init?
-    if _hand.length is 0
-      init = true
-    # console.log _hand.length, init, 'length'
-    # setup global _hand here
-    _hand = data.map ( v ) ->
-      return new Card v.opts
-    renderHand _hand
-    if init
+    return setTimeout ->
+      window.location = '/'
+    , 3000
+  .on 'cards', ( user ) ->
+    updateCreds user[user.mode + 'Creds']
+    console.log 'cards event, Played?:', user.hand.played
+    _user = user
+    _user.hand = new Hand
+      deck: user.hand.deck.cards
+      cards: user.hand.cards
+      played: user.hand.played
+    renderHand _user.hand
+    if _user.hand.played
+      _$events.trigger 'game_complete'
+    else
       _$events.trigger 'new_game'
     return
   .on 'score', ( data ) ->
-    console.log data
-    $result.text data.status + ' win:' + data.win
+    return $result.text data.status + ' win:' + data.win

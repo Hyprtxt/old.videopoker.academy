@@ -1,6 +1,7 @@
 'use strict'
 
-Card = require './card'
+if typeof window is 'undefined'
+  Card = require './card'
 
 Deck = ( options ) ->
   @opts = options or {}
@@ -45,4 +46,7 @@ Deck::shuffle = ->
 Deck::draw = ->
   return @cards.shift()
 
-module.exports = Deck
+if typeof window is 'undefined'
+	module.exports = Deck
+else
+	window.Deck = Deck

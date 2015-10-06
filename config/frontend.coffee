@@ -5,7 +5,9 @@ module.exports =
     '/js/jquery.min.js'
     '/js/global.js'
     '/js/card.js'
-    # '/js/simple.js'
+    '/js/deck.js'
+    '/js/hand.js'
+    '/js/simple.js'
     '/js/poker.js'
     '/js/script.js'
     '/js/events.js'
@@ -24,5 +26,8 @@ module.exports =
   ,
     title: 'Logout'
     link: '/logout'
+  # ,
+  #   title: 'Profile'
+  #   link: '/profile'
   ]
   timestamp: new Date()
