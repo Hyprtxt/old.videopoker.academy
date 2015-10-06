@@ -5,6 +5,8 @@ module.exports =
     '/js/jquery.min.js'
     '/js/global.js'
     '/js/card.js'
+    '/js/deck.js'
+    '/js/hand.js'
     '/js/simple.js'
     '/js/poker.js'
     '/js/script.js'

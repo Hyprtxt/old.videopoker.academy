@@ -17,19 +17,15 @@ exports.register = ( server, options, next ) ->
 
   io = require('socket.io')(server.listener)
 
-  io.on 'connection', ( socket ) ->
-    # console.log 'CONNECTION', socket.request.headers
+  io.use ( socket, next ) ->
+    console.log socket.handshake.query
+    return next();
 
-    # server.app.cache.set socket.id,
-    #   hand: new_hand
-    # , null, ( err ) ->
-    #   if err
-    #     throw err
-    #   return
+  io.on 'connection', ( socket ) ->
 
     socket
       .on 'link', ( data ) ->
-        new_hand = new Hand()
+        console.log data
         getQuery = {
           sql: 'SELECT * FROM `users` WHERE ?',
           values: [
@@ -37,57 +33,70 @@ exports.register = ( server, options, next ) ->
           ]
         }
         server.plugins['mysql'].query getQuery, ( rows ) ->
-          server.app.cache.set socket.id,
-            user: rows[0]
-            mode: data.mode
-            hand: new_hand
-          , null, ( err ) ->
+          user = rows[0]
+          # Check for cached data
+          server.app.cache.get user.sid, ( err, userCache ) ->
             if err
               throw err
-            socket.emit 'cards', new_hand.cards
-            return
+            if userCache is null
+              user.mode = data.mode
+              user.hand = new Hand()
+              server.app.cache.set user.sid, user, null, ( err ) ->
+                if err
+                  throw err
+                socket.emit 'cards', user
+                return
+            else
+              socket.emit 'cards', userCache
           return
       .on 'disconnect', ->
         console.log socket.id + ' disconnected'
-        server.app.cache.drop socket.id, ( err ) ->
-          if err
-            throw err
-        return
-      .on 'draw', ( data ) ->
+        # Don't drop the cache, it's good stuff
+        # server.app.cache.drop socket.id, ( err ) ->
+        #   if err
+        #     throw err
+        # return
+      .on 'draw', ( client ) ->
         ## Hand is over
         console.log 'draw for ' + socket.id
-        server.app.cache.get socket.id, ( err, cache ) ->
+        server.app.cache.get client.sid, ( err, user ) ->
           if err
             throw err
-          # console.log 'draw for ', cache
-          hand = new Hand
-            deck: cache.hand.deck.cards
-            size: cache.hand.size
-            cards: cache.hand.cards.map ( card ) ->
-              return card.opts
-          startHand = hand.cards.map ( card ) ->
+          # console.log 'draw for ', user
+          # console.log user.hand.cards
+          secure = {}
+          secure.hand = new Hand
+            deck: user.hand.deck.cards
+            cards: user.hand.cards
+            played: true
+          delete user.hand
+
+          startHand = secure.hand.cards.map ( card ) ->
             return card.databaseText()
-          pre = getHoldStatus( hand.cards )
-          data.forEach ( card, i ) ->
+          console.log 'Server Hand:', startHand
+          console.log 'Client Hand:', client.hand.cards.map ( card ) ->
+            return card.opts
+          # pre = getHoldStatus( secure.hand.cards )
+          client.hand.cards.forEach ( card, i ) ->
             if !card.held
-              hand.replace i
-              console.log "Replaced " + i
+              secure.hand.replace i
             return
-          endHand = hand.cards.map ( card ) ->
+          endHand = secure.hand.cards.map ( card ) ->
             return card.databaseText()
-          post = getHoldStatus( hand.cards )
+          console.log 'Server New Hand:', endHand
+          # post = getHoldStatus( hand.cards )
+          user.hand = secure.hand
           # console.log pre, post
-          strategy = 1
-          if JSON.stringify( pre ) isnt JSON.stringify( post )
-            strategy = 0
-          console.log startHand, endHand, strategy
-          theCards = hand.cards
-          score = Poker hand.cards, 5
+          strategy = false
+          # if JSON.stringify( pre ) is JSON.stringify( post )
+          #   strategy = true
+          # console.log startHand, endHand, strategy
+          score = Poker user.hand.cards, 5
           saveCards = {
             sql: 'INSERT INTO `hands` SET ?',
             values: [
-              user: cache.user.id
-              mode: cache.mode
+              user: user.id
+              mode: user.mode
               start: startHand.join()
               end: endHand.join()
               win: score.win
@@ -97,206 +106,206 @@ exports.register = ( server, options, next ) ->
           }
           server.plugins['mysql'].query saveCards, ( rows ) ->
             # console.log rows, 'saveCards rows'
-            socket.emit 'cards', theCards
+            socket.emit 'cards', user
             socket.emit 'score', score
             return
           return
         return
-      .on 'deal', ( data ) ->
-        console.log 'deal for ' + socket.id
-        server.app.cache.get socket.id, ( err, cache ) ->
-          cache.hand = new Hand()
-          server.app.cache.set socket.id, cache, null, ( err ) ->
+      .on 'deal', ( client ) ->
+        server.app.cache.get client.sid, ( err, user ) ->
+          delete user.hand
+          user.hand = new Hand()
+          server.app.cache.set user.sid, user, null, ( err ) ->
             if err
               throw err
-            socket.emit('cards', cache.hand.cards );
+            socket.emit('cards', user );
             return
           return
         return
-      .on 'test', ( data ) ->
-        console.log data, 'Test'
-        if data is '4toFlush'
-          test = new Hand
-            cards: [
-              suit: 0
-              value: 2
-            ,
-              suit: 1
-              value: 3
-            ,
-              suit: 0
-              value: 4
-            ,
-              suit: 0
-              value: 5
-            ,
-              suit: 0
-              value: 3
-            ]
-        if data is '3toRoyalFlush'
-          test = new Hand
-            cards: [
-              suit: 0
-              value: 10
-            ,
-              suit: 0
-              value: 11
-            ,
-              suit: 0
-              value: 12
-            ,
-              suit: 1
-              value: 5
-            ,
-              suit: 1
-              value: 3
-            ]
-        if data is '4toOusideStraight'
-          test = new Hand
-            cards: [
-              suit: 0
-              value: 4
-            ,
-              suit: 1
-              value: 6
-            ,
-              suit: 0
-              value: 12
-            ,
-              suit: 3
-              value: 5
-            ,
-              suit: 1
-              value: 7
-            ]
-        if data is '2highCards'
-          test = new Hand
-            cards: [
-              suit: 3
-              value: 0
-            ,
-              suit: 2
-              value: 1
-            ,
-              suit: 1
-              value: 12
-            ,
-              suit: 1
-              value: 11
-            ,
-              suit: 0
-              value: 9
-            ]
-        if data is 'insideStraight'
-          test = new Hand
-            cards: [
-              suit: 3
-              value: 6
-            ,
-              suit: 1
-              value: 7
-            ,
-              suit: 2
-              value: 9
-            ,
-              suit: 0
-              value: 12
-            ,
-              suit: 1
-              value: 8
-            ]
-        if data is '4toStraightFlush'
-          test = new Hand
-            cards: [
-              suit: 1
-              value: 5
-            ,
-              suit: 1
-              value: 7
-            ,
-              suit: 1
-              value: 9
-            ,
-              suit: 0
-              value: 12
-            ,
-              suit: 1
-              value: 8
-            ]
-        if data is '3toStraightFlush'
-          test = new Hand
-            cards: [
-              suit: 1
-              value: 5
-            ,
-              suit: 1
-              value: 7
-            ,
-              suit: 1
-              value: 9
-            ,
-              suit: 0
-              value: 12
-            ,
-              suit: 0
-              value: 8
-            ]
-        if data is '3toStraightFlushAlt'
-          test = new Hand
-            cards: [
-              suit: 0
-              value: 4
-            ,
-              suit: 2
-              value: 8
-            ,
-              suit: 0
-              value: 5
-            ,
-              suit: 0
-              value: 3
-            ,
-              suit: 3
-              value: 9
-            ]
-        if data is 'suited10Q'
-          test = new Hand
-            cards: [
-              suit: 0
-              value: 5
-            ,
-              suit: 0
-              value: 7
-            ,
-              suit: 1
-              value: 9
-            ,
-              suit: 1
-              value: 11
-            ,
-              suit: 0
-              value: 8
-            ]
-        if data is 'lowUnsuited'
-          test = new Hand
-            cards: [
-              suit: 3
-              value: 12
-            ,
-              suit: 3
-              value: 5
-            ,
-              suit: 2
-              value: 11
-            ,
-              suit: 1
-              value: 7
-            ,
-              suit: 0
-              value: 10
-            ]
-        socket.emit( 'cards', test.cards )
-        return
+      # .on 'test', ( data ) ->
+      #   console.log data, 'Test'
+      #   if data is '4toFlush'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 0
+      #         value: 2
+      #       ,
+      #         suit: 1
+      #         value: 3
+      #       ,
+      #         suit: 0
+      #         value: 4
+      #       ,
+      #         suit: 0
+      #         value: 5
+      #       ,
+      #         suit: 0
+      #         value: 3
+      #       ]
+      #   if data is '3toRoyalFlush'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 0
+      #         value: 10
+      #       ,
+      #         suit: 0
+      #         value: 11
+      #       ,
+      #         suit: 0
+      #         value: 12
+      #       ,
+      #         suit: 1
+      #         value: 5
+      #       ,
+      #         suit: 1
+      #         value: 3
+      #       ]
+      #   if data is '4toOusideStraight'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 0
+      #         value: 4
+      #       ,
+      #         suit: 1
+      #         value: 6
+      #       ,
+      #         suit: 0
+      #         value: 12
+      #       ,
+      #         suit: 3
+      #         value: 5
+      #       ,
+      #         suit: 1
+      #         value: 7
+      #       ]
+      #   if data is '2highCards'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 3
+      #         value: 0
+      #       ,
+      #         suit: 2
+      #         value: 1
+      #       ,
+      #         suit: 1
+      #         value: 12
+      #       ,
+      #         suit: 1
+      #         value: 11
+      #       ,
+      #         suit: 0
+      #         value: 9
+      #       ]
+      #   if data is 'insideStraight'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 3
+      #         value: 6
+      #       ,
+      #         suit: 1
+      #         value: 7
+      #       ,
+      #         suit: 2
+      #         value: 9
+      #       ,
+      #         suit: 0
+      #         value: 12
+      #       ,
+      #         suit: 1
+      #         value: 8
+      #       ]
+      #   if data is '4toStraightFlush'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 1
+      #         value: 5
+      #       ,
+      #         suit: 1
+      #         value: 7
+      #       ,
+      #         suit: 1
+      #         value: 9
+      #       ,
+      #         suit: 0
+      #         value: 12
+      #       ,
+      #         suit: 1
+      #         value: 8
+      #       ]
+      #   if data is '3toStraightFlush'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 1
+      #         value: 5
+      #       ,
+      #         suit: 1
+      #         value: 7
+      #       ,
+      #         suit: 1
+      #         value: 9
+      #       ,
+      #         suit: 0
+      #         value: 12
+      #       ,
+      #         suit: 0
+      #         value: 8
+      #       ]
+      #   if data is '3toStraightFlushAlt'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 0
+      #         value: 4
+      #       ,
+      #         suit: 2
+      #         value: 8
+      #       ,
+      #         suit: 0
+      #         value: 5
+      #       ,
+      #         suit: 0
+      #         value: 3
+      #       ,
+      #         suit: 3
+      #         value: 9
+      #       ]
+      #   if data is 'suited10Q'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 0
+      #         value: 5
+      #       ,
+      #         suit: 0
+      #         value: 7
+      #       ,
+      #         suit: 1
+      #         value: 9
+      #       ,
+      #         suit: 1
+      #         value: 11
+      #       ,
+      #         suit: 0
+      #         value: 8
+      #       ]
+      #   if data is 'lowUnsuited'
+      #     test = new Hand
+      #       cards: [
+      #         suit: 3
+      #         value: 12
+      #       ,
+      #         suit: 3
+      #         value: 5
+      #       ,
+      #         suit: 2
+      #         value: 11
+      #       ,
+      #         suit: 1
+      #         value: 7
+      #       ,
+      #         suit: 0
+      #         value: 10
+      #       ]
+      #   socket.emit( 'cards', test.cards )
+      #   return
     return
 
   next()

@@ -3,6 +3,7 @@
 # !!! This is a shared module, used both server and client side
 
 Card = ( options ) ->
+  delete options.opts
   @opts = options or {}
   @suit = @opts.suit or 0
   @value = @opts.value or 0

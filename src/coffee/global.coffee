@@ -1,7 +1,6 @@
 # Globals
 _$events = $ {}
-_hand = []
-
+_user = {}
 # DOM Globals
 $buttons = $ '.buttons'
 $credits = $ '.credits'
@@ -11,8 +10,8 @@ $deal = $ '.deal'
 $draw = $ '.draw'
 
 # DOM Binding Helpers
-renderHand = ( hand ) ->
-  hand.forEach ( card, i ) ->
+renderHand = ( user ) ->
+  user.cards.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
     $card
       .removeClass 'hold red black'
@@ -35,6 +34,7 @@ clearHolds = ( hand ) ->
   hand.forEach ( card ) ->
     card.drop()
     return
+  return
 
 # AUTO Strategy Functions
 

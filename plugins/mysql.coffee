@@ -21,11 +21,11 @@ exports.register = ( server, options, next ) ->
           server.log ['error', 'database', 'query'], err
         callback rows
         return
-      connection.on 'error', ( err ) ->
-        connection.off 'error'
-        connection.release()
-        server.log ['error', 'database', 'connection'], err
-        return
+      # connection.on 'error', ( err ) ->
+      #   connection.off 'error'
+      #   connection.release()
+      #   server.log ['error', 'database', 'connection'], err
+      #   return
       return
     return
 
