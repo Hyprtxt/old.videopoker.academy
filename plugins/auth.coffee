@@ -34,7 +34,6 @@ exports.register = ( server, options, next ) ->
       ]
     }
     server.plugins['mysql'].query getQuery, ( rows ) ->
-      console.log rows, 'rows', rows.length
       if rows.length is 0
         # Create User
         if account.provider is 'facebook'
