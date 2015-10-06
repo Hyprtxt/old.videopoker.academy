@@ -5,7 +5,7 @@ _user = _user
 holdEvent =  ->
   # console.log $(this).index(), _user.hand.cards[$(this).index()]
   _user.hand.cards[$(this).index()].holdToggle()
-  renderHand _user.hand _user.hand
+  renderHand _user.hand
   return
 
 addHoldEvents = ->
@@ -45,28 +45,3 @@ _$events.on 'game_complete', ->
   $deal.removeAttr 'hidden'
   removeHoldEvents()
   return
-
-# console.log getHoldStatus(), 'pre'
-# pre = getHoldStatus()
-# clearHolds _user.hand
-# result = simpleStrategy()
-# $rule.text result.rule
-# post = getHoldStatus()
-# console.log getHoldStatus(), 'post'
-# console.log result
-# if JSON.stringify( pre ) isnt JSON.stringify( post )
-
-# console.log _user
-# if mode is 'trainer'
-#   # _$events.trigger 'game_over'
-#   alert 'Game Over! Correct move was rule ' + result.rule
-#   window.location.href = '/'
-#   return
-# else
-#   console.log 'not trainer'
-
-# _$events.on 'game_over', ->
-#   alert 'Game Over!'
-#   window.location.href = '/'
-#   removeHoldEvents()
-#   return
