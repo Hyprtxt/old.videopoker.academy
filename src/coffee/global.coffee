@@ -10,8 +10,19 @@ $deal = $ '.deal'
 $draw = $ '.draw'
 
 # DOM Binding Helpers
-renderHand = ( user ) ->
-  return user.cards.forEach ( card, i ) ->
+renderCards = ( cards ) ->
+  return cards.forEach ( card, i ) ->
+    $card = $ '.card-' + ( i + 1 )
+    $card
+      .removeClass 'hold red black'
+      .text card.text()
+      .addClass card.color()
+    if card.held
+      $card.addClass 'hold'
+    return
+
+renderHand = ( hand ) ->
+  return hand.cards.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
     $card
       .removeClass 'hold red black'
@@ -25,8 +36,8 @@ updateCreds = ( amount ) ->
   return $credits.text amount
 
 # something...
-clearHolds = ( hand ) ->
-  hand.forEach ( card ) ->
+clearHolds = ( cards ) ->
+  cards.forEach ( card ) ->
     card.drop()
     return
   return
@@ -40,45 +51,45 @@ clearHolds = ( hand ) ->
 #     if indexArrayToHold.indexOf(idx) isnt -1
 #       card.hold()
 #     return
-#   renderHand hand
+#   renderHand _user.hand hand
 #   return
 
-holdAllExcept = ( hand, index ) ->
-  # console.log hand, index
-  hand.forEach ( card, i ) ->
+holdAllExcept = ( cards, index ) ->
+  # console.log cards, index
+  cards.forEach ( card, i ) ->
     if i isnt index
       card.hold()
     # console.log card, i, index
     return
-  renderHand hand
+  renderCards cards
   return
 
-holdSuit = ( hand, suit ) ->
-  hand.forEach ( card ) ->
+holdSuit = ( cards, suit ) ->
+  cards.forEach ( card ) ->
     if card.suit is suit
       card.hold()
     return
-  renderHand hand
+  renderCards cards
   return
 
-holdDupes = ( hand, length ) ->
+holdDupes = ( cards, length ) ->
   [0..12].forEach ( v, i ) ->
     holds = []
-    hand.forEach ( card, idx ) ->
+    cards.forEach ( card, idx ) ->
       if card.value == v
         holds.push( idx )
       return
     if holds.length is length
-      hand.forEach ( card, index ) ->
+      cards.forEach ( card, index ) ->
         if card.value is v
           card.hold()
       return
-  renderHand hand
+  renderCards cards
   return
 
-holdAll = ( hand ) ->
-  hand.forEach ( card ) ->
+holdAll = ( cards ) ->
+  cards.forEach ( card ) ->
     card.hold()
     return
-  renderHand hand
+  renderCards cards
   return

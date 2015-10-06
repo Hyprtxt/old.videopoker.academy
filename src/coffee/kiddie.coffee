@@ -8,7 +8,8 @@ _$events.on 'new_game', ->
   $simple.removeAttr 'hidden'
   $rule.text ''
   $simple.on 'click', ->
-    clearHolds _hand
+    # console.log _user.hand.cards
+    clearHolds _user.hand.cards
     result = simpleStrategy()
     $rule.text result.rule
     console.log result
