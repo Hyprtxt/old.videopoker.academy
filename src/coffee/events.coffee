@@ -38,7 +38,6 @@ _$events.on 'new_game', ->
   $draw.removeAttr 'hidden'
   addHoldEvents()
   return
-  # updateCreds -5
 
 _$events.on 'game_complete', ->
   console.log 'game_complete'

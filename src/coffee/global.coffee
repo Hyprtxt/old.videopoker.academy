@@ -11,7 +11,7 @@ $draw = $ '.draw'
 
 # DOM Binding Helpers
 renderHand = ( user ) ->
-  user.cards.forEach ( card, i ) ->
+  return user.cards.forEach ( card, i ) ->
     $card = $ '.card-' + ( i + 1 )
     $card
       .removeClass 'hold red black'
@@ -20,14 +20,9 @@ renderHand = ( user ) ->
     if card.held
       $card.addClass 'hold'
     return
-  return
 
 updateCreds = ( amount ) ->
-  creds = parseInt $credits.text()
-  # console.log creds, amount
-  $credits.text creds + amount
-  # console.log $credits.text
-  return
+  return $credits.text amount
 
 # something...
 clearHolds = ( hand ) ->

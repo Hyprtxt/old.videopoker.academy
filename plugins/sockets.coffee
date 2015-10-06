@@ -6,6 +6,39 @@ getHoldStatus = ( cards ) ->
   return cards.map ( card ) ->
     return card.held
 
+updateCredits = ( server, mode = 'classicCreds', amount = 0, user, cb = -> ) ->
+  getCreds =
+    sql: 'SELECT * FROM `users` WHERE ?'
+    values: [
+      id: user.id
+    ]
+  server.plugins['mysql'].query getCreds, ( rows ) ->
+    dbUser = rows[0]
+    user[mode] = dbUser[mode] + amount
+    updateUser =
+      sql: 'UPDATE `users` SET ?? = ? WHERE ?'
+      values: [
+        mode
+        user[mode]
+        id: user.id
+      ]
+    server.plugins['mysql'].query updateUser
+    cb user
+  return
+
+sendNewCards = ( server, socket, user, data = {} ) ->
+  if data.mode isnt undefined
+    user.mode = data.mode
+  delete user.hand
+  user.hand = new Hand()
+  updateCredits server, user.mode + 'Creds', -5, user, ( user ) ->
+    server.app.cache.set user.sid, user, null, ( err ) ->
+      if err
+        throw err
+      return socket.emit 'cards', user
+  return
+
+
 exports.register = ( server, options, next ) ->
   cache = server.cache
     expiresIn: 1 * 24 * 3600 * 1000 # 1 day
@@ -34,48 +67,33 @@ exports.register = ( server, options, next ) ->
         }
         server.plugins['mysql'].query getQuery, ( rows ) ->
           user = rows[0]
-          # Check for cached data
-          server.app.cache.get user.sid, ( err, userCache ) ->
+          return server.app.cache.get user.sid, ( err, userCache ) ->
             if err
               throw err
             if userCache is null
-              user.mode = data.mode
-              user.hand = new Hand()
-              server.app.cache.set user.sid, user, null, ( err ) ->
-                if err
-                  throw err
-                socket.emit 'cards', user
-                return
+              sendNewCards( server, socket, user, data )
             else
-              socket.emit 'cards', userCache
-          return
+              if user.mode is data.mode
+                socket.emit 'cards', userCache
+              else
+                sendNewCards( server, socket, user, data )
+            return
       .on 'disconnect', ->
         console.log socket.id + ' disconnected'
-        # Don't drop the cache, it's good stuff
-        # server.app.cache.drop socket.id, ( err ) ->
-        #   if err
-        #     throw err
-        # return
       .on 'draw', ( client ) ->
         ## Hand is over
         console.log 'draw for ' + socket.id
         server.app.cache.get client.sid, ( err, user ) ->
           if err
             throw err
-          # console.log 'draw for ', user
-          # console.log user.hand.cards
           secure = {}
           secure.hand = new Hand
             deck: user.hand.deck.cards
             cards: user.hand.cards
             played: true
           delete user.hand
-
           startHand = secure.hand.cards.map ( card ) ->
             return card.databaseText()
-          console.log 'Server Hand:', startHand
-          console.log 'Client Hand:', client.hand.cards.map ( card ) ->
-            return card.opts
           # pre = getHoldStatus( secure.hand.cards )
           client.hand.cards.forEach ( card, i ) ->
             if !card.held
@@ -83,14 +101,13 @@ exports.register = ( server, options, next ) ->
             return
           endHand = secure.hand.cards.map ( card ) ->
             return card.databaseText()
-          console.log 'Server New Hand:', endHand
           # post = getHoldStatus( hand.cards )
-          user.hand = secure.hand
           # console.log pre, post
-          strategy = false
           # if JSON.stringify( pre ) is JSON.stringify( post )
           #   strategy = true
           # console.log startHand, endHand, strategy
+          strategy = false
+          user.hand = secure.hand
           score = Poker user.hand.cards, 5
           saveCards = {
             sql: 'INSERT INTO `hands` SET ?',
@@ -104,24 +121,18 @@ exports.register = ( server, options, next ) ->
               strategy: strategy
             ]
           }
-          server.plugins['mysql'].query saveCards, ( rows ) ->
-            # console.log rows, 'saveCards rows'
-            socket.emit 'cards', user
-            socket.emit 'score', score
-            return
-          return
+          # server.plugins['mysql'].query saveCards, ( rows ) ->
+          server.plugins['mysql'].query saveCards
+          socket.emit 'score', score
+          if score.win isnt 0
+            return updateCredits server, user.mode + 'Creds', score.win, user, ( user ) ->
+              return socket.emit 'cards', user
+          else
+            return socket.emit 'cards', user
         return
       .on 'deal', ( client ) ->
-        server.app.cache.get client.sid, ( err, user ) ->
-          delete user.hand
-          user.hand = new Hand()
-          server.app.cache.set user.sid, user, null, ( err ) ->
-            if err
-              throw err
-            socket.emit('cards', user );
-            return
-          return
-        return
+        return server.app.cache.get client.sid, ( err, user ) ->
+          return sendNewCards( server, socket, user )
       # .on 'test', ( data ) ->
       #   console.log data, 'Test'
       #   if data is '4toFlush'
