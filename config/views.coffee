@@ -11,7 +11,7 @@ store = new Confidence.Store
     production:
       compileOptions:
         pretty: false
-      isCached: true
+      isCached: false
     $default: # for devs
       compileOptions:
         pretty: true

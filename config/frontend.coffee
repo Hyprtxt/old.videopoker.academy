@@ -1,5 +1,5 @@
 module.exports =
-  title: 'Hypr-Hapi'
+  title: 'Video Poker Academy'
   javascripts: [
     '/socket.io/socket.io.js'
     '/js/jquery.min.js'
@@ -18,7 +18,7 @@ module.exports =
     '/css/style.css'
   ]
   navbarBrand:
-    title: 'Hyprtxt Video Poker'
+    title: 'Video Poker Academy'
     link: '/'
   navigation: [
     title: 'Simple Strategy Rules'

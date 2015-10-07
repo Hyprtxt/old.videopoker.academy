@@ -8,7 +8,7 @@ store = new Confidence.Store
       host: 'localhost'
       port: 8003
     $default: # for devs
-      host: 'auth.hyprtxt.dev'
+      host: 'videopoker.dev'
       port: 8003
 
 criteria =
