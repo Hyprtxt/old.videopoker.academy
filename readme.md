@@ -31,5 +31,5 @@ Install NVM
 
 ```
 sudo apt-get install build-essential
-forever start --uid "auth.hyprtxt.com" --append -c ./node_modules/coffee-script/bin/coffee index.coffee
+forever start --uid "videopoker.academy" --append -c ./node_modules/coffee-script/bin/coffee index.coffee
 ```

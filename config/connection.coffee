@@ -6,10 +6,10 @@ store = new Confidence.Store
     $filter: 'env'
     production:
       host: 'localhost'
-      port: 8001
+      port: 8003
     $default: # for devs
       host: 'auth.hyprtxt.dev'
-      port: 8001
+      port: 8003
 
 criteria =
   # https://docs.npmjs.com/misc/config#production
