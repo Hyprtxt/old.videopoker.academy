@@ -30,4 +30,5 @@ module.exports =
   #   title: 'Profile'
   #   link: '/profile'
   ]
+  env: process.env.NODE_ENV
   timestamp: new Date()
