@@ -11,14 +11,18 @@ server = new Hapi.Server()
 
 server.connection require('./config/connection').get('/connectionConfig')
 
+server.connection require('./config/connection').get('/connectionSocketConfig')
+
 setupTmp() # creates `./logs/good.log` if needed
 
 server.register require('./config/plugins'), throwErr
 
-server.views require('./config/views').get('/viewConfig')
+srvr = server.select( 'main' )
+
+srvr.views require('./config/views').get('/viewConfig')
 
 # Homepage
-server.route
+srvr.route
   method: 'GET'
   path: '/'
   config:
@@ -29,7 +33,7 @@ server.route
       return
 
 # Classic Mode
-server.route
+srvr.route
   method: 'GET'
   path: '/classic'
   config:
@@ -40,7 +44,7 @@ server.route
       return
 
 # Kiddie Mode
-server.route
+srvr.route
   method: 'GET'
   path: '/kiddie'
   config:
@@ -51,7 +55,7 @@ server.route
       return
 
 # Trainer Mode
-server.route
+srvr.route
   method: 'GET'
   path: '/trainer'
   config:
@@ -62,7 +66,7 @@ server.route
       return
 
 # Rules Page
-server.route
+srvr.route
   method: 'GET'
   path: '/rules'
   config:
@@ -73,7 +77,7 @@ server.route
       return
 
 # Profile Page
-server.route
+srvr.route
   method: 'GET'
   path: '/profile'
   config:
@@ -83,7 +87,7 @@ server.route
       reply.view 'profile', request.pre
       return
 
-server.route
+srvr.route
   method: 'GET'
   path: '/login'
   config:
@@ -101,7 +105,7 @@ server.route
       reply.view 'login', request.pre
       return
 
-server.route
+srvr.route
   method: 'GET'
   path: '/logout'
   config:
@@ -111,7 +115,7 @@ server.route
       return reply.redirect('/login')
 
 # Static
-server.route
+srvr.route
   method: 'GET'
   path: '/{param*}'
   handler:
@@ -125,5 +129,6 @@ server.route
 
 # Start the server
 server.start ->
-  console.log 'Server running at:', server.info.uri
+  console.log 'Server running at:', srvr.info.uri
+  console.log 'Server running at:', server.select( 'socket' ).info.uri
   return

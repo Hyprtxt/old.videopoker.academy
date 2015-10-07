@@ -4,7 +4,7 @@ console.log 'MODE: ' + mode, 'SID: ' + session.sid
 _hand = _hand
 _user = _user
 
-socket = io '/'
+socket = io socket_url
 
 $result = $ '.result'
 

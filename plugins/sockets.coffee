@@ -48,7 +48,7 @@ exports.register = ( server, options, next ) ->
   server.bind
     cache: server.app.cache
 
-  io = require('socket.io')(server.listener)
+  io = require('socket.io')(server.select( 'socket' ).listener)
 
   io.use ( socket, next ) ->
     console.log socket.handshake.query

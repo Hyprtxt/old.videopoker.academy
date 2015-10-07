@@ -1,7 +1,7 @@
+# Static route globals
 module.exports =
   title: 'Video Poker Academy'
   javascripts: [
-    '/socket.io/socket.io.js'
     '/js/jquery.min.js'
     '/js/global.js'
     '/js/card.js'

@@ -30,6 +30,16 @@ html
         ga('create', 'UA-42766222-10', 'auto');
         ga('send', 'pageview');
 
+    block socket
+      - if( env == 'production' )
+        script(src='//socket.videopoker.academy/socket.io/socket.io.js')
+        script.
+          var socket_url = '//socket.videopoker.academy/'
+      - else
+        script(src='//socket.videopoker.dev/socket.io/socket.io.js')
+        script. 
+          var socket_url = '//socket.videopoker.dev/'
+
     block data
 
     block global
