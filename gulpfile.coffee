@@ -43,6 +43,8 @@ gulp.task 'copyjs', ->
 gulp.task 'copystyle', ->
   gulp.src './bower_components/font-awesome/css/*'
     .pipe gulp.dest './static_generated/css'
+  gulp.src './bower_components/font-awesome/fonts/*'
+    .pipe gulp.dest './static_generated/fonts'
 
 gulp.task 'coffee', ->
   gulp.src './src/coffee/**/*.coffee'
