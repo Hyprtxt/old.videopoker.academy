@@ -24,7 +24,8 @@ block content
         fieldset.form-group
           label(for='kiddieCreds') Trainer Mode Credits
           input#kiddieCreds.form-control(disabled, value=user.trainerCreds)
-      pre=JSON.stringify( user, null, 2 )
+      - if( env == 'production' )
+        pre=JSON.stringify( user, null, 2 )
       //- pre=JSON.stringify( auth.credentials.profile, null, 2 )
 
 block global

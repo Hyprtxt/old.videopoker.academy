@@ -32,11 +32,9 @@ html
 
     block socket
       - if( env == 'production' )
-        script(src='http://socket.videopoker.academy/socket.io/socket.io.js')
         script.
           var socket_url = 'http://socket.videopoker.academy/'
       - else
-        script(src='http://socket.videopoker.dev/socket.io/socket.io.js')
         script. 
           var socket_url = 'http://socket.videopoker.dev/'
 

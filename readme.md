@@ -1,3 +1,27 @@
+# videopoker.academy
+
+## @todo
+
+* Create Repository
+* Landing Page - no redirect to login for visitors
+* Rename classic mode to Free Play - credits with no help
+* Trainer Mode - A Suggestive Mode
+* Streak Mode - Hard, perhaps test mode
+
+## Style Fixes
+
+* Get base Styles into line
+* Create theme options; allow users to customize their experience
+* How far? styles, animation, ux
+
+## Backend
+
+* Fix Credit Tracking
+
+## Frontend
+
+* Hand Tracking features, reports & graphs
+
 # Hyprtxt Hapi
 
 Cool stuff!
